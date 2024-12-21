@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+service QuizService {
+  rpc GetQuestions (Empty) returns (stream Question);
+  rpc SubmitAnswer (stream Answer) returns (Result);
+  rpc JoinGame (JoinRequest) returns (stream GameState);
+}
+
+message Question {
+  int32 id = 1;
+  string content = 2;
+  repeated string options = 3;
+}
+
+message Answer {
+  int32 questionId = 1;
+  int32 selectedOption = 2;
+}
+
+message Result {
+  string message = 1;
+  int32 score = 2;
+}
+
+message JoinRequest {
+  string playerId = 1;
+}
+
+message GameState {
+  repeated string players = 1;
+  string currentQuestion = 2;
+}
+
+message Empty {}
