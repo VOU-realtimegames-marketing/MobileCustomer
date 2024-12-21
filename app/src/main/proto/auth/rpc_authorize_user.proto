@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package vou.proto;
+
+import "auth/user.proto";
+
+//option go_package = "VOU-Server/proto/gen";
+
+message AuthorizeRequest {}
+
+message AuthorizeResponse {
+  User user = 1;
+}
