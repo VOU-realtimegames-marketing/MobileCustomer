@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 
 import androidx.annotation.Nullable;
@@ -14,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MainActivity extends AppCompatActivity{
 
     String[] items ={"Quiz vui có quà", "Lắc ngay trúng thưởng", "Thích thì Quiz, không thì Quit", "Trò nào cũng có"};
-    
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +42,27 @@ public class MainActivity extends AppCompatActivity{
 
         ArrayAdapter<String> event_adapter = new ArrayAdapter<String>(this, R.layout.item_layout, R.id.event_name, items);
         list_event.setAdapter(event_adapter);
+
+        Button voucher_gift_button = (Button) findViewById(R.id.button_voucher_gift);
+        Button more_play_time_button = (Button) findViewById(R.id.button_plus);
+
+        voucher_gift_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent voucher_gift_intent = new Intent(main_context, VoucherGift.class);
+                startActivity(voucher_gift_intent);
+            }
+        });
+
+        more_play_time_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent more_play_time_intent = new Intent(main_context, AddPlayTimeActivity.class);
+                startActivity(more_play_time_intent);
+
+            }
+        });
+
 
 
 
