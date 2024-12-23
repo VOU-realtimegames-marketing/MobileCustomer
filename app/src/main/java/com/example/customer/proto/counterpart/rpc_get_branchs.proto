@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package vou.proto;
+
+import "counterpart/branch.proto";
+
+option go_package = "VOU-Server/proto/gen";
+
+message GetBranchsRequest {
+  int64 store_id = 1;
+}
+
+message GetBranchsResponse {
+  repeated Branch branchs = 1;
+}

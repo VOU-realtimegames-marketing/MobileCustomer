@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package vou.proto;
+
+option go_package = "VOU-Server/proto/gen";
+
+message Store {
+  int64 id = 1;
+  string name = 2;
+  string owner = 3;
+  string business_type = 4;
+}

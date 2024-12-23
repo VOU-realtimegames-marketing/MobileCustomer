@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package vou.proto;
+
+import "counterpart/branch.proto";
+
+option go_package = "VOU-Server/proto/gen";
+
+message CreateBranchRequest {
+  int64 store_id = 1;
+  string name = 2;
+  string position = 3;
+  string city_name = 4;
+  string country = 5;
+  string address = 6;
+  string emoji = 7;
+  string owner = 8;
+}
+
+message CreateBranchResponse {
+  Branch branch = 1;
+}

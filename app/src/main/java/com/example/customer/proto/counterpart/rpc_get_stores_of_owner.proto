@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package vou.proto;
+
+import "counterpart/store.proto";
+
+option go_package = "VOU-Server/proto/gen";
+
+message GetStoresOfOwnerRequest {
+  string owner = 1;
+}
+
+message GetStoresOfOwnerResponse {
+  repeated Store stores = 1;
+}

@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package vou.proto;
+
+option go_package = "VOU-Server/proto/gen";
+
+message DeleteBranchRequest {
+  int64 id = 1;
+}
+
+message DeleteBranchResponse {}

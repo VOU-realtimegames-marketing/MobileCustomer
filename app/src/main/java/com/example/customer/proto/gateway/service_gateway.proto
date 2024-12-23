@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package vou.proto;
+
+import "google/api/annotations.proto";
+import "auth/rpc_create_user.proto";
+import "auth/rpc_login_user.proto";
+import "auth/rpc_authorize_user.proto";
+import "auth/rpc_renew_access_token.proto";
+
+import "counterpart/rpc_create_store.proto";
+import "counterpart/rpc_get_stores_of_owner.proto";
+import "counterpart/rpc_update_store.proto";
+import "counterpart/rpc_delete_store.proto";
+
+import "counterpart/rpc_create_branch.proto";
+import "counterpart/rpc_get_branchs.proto";
+import "counterpart/rpc_delete_branch.proto";
+
+option go_package = "VOU-Server/proto/gen";
+
+service Gateway {
+  // BEGIN AUTH
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/create_user"
+      body: "*"
+    };
+  }
+  rpc LoginUser(LoginUserRequest) returns (LoginUserResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/login_user"
+      body: "*"
+    };
+  }
+  rpc AuthorizeUser(AuthorizeRequest) returns (AuthorizeResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/authorize"
+    };
+  }
+  rpc RenewAccessToken(RenewAccessTokenRequest) returns (RenewAccessTokenResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/tokens/renew_access"
+      body: "*"
+    };
+  }
+  // END AUTH
+
+  // BEGIN COUNTERPART
+  rpc CreateStore(CreateStoreRequest) returns (CreateStoreResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/create_store"
+      body: "*"
+    };
+  }
+  rpc GetAllStoresOfOwner(GetStoresOfOwnerRequest) returns (GetStoresOfOwnerResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/stores"
+    };
+  }
+  rpc UpdateStore(UpdateStoreRequest) returns (UpdateStoreResponse) {
+    option (google.api.http) = {
+      patch: "/api/v1/stores/{id}"
+      body: "*"
+    };
+  }
+  rpc DeleteStore(DeleteStoreRequest) returns (DeleteStoreResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/stores/{id}"
+      body: "*"
+    };
+  }
+
+  rpc CreateBranch(CreateBranchRequest) returns (CreateBranchResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/create_branch"
+      body: "*"
+    };
+  }
+  rpc GetBranchs(GetBranchsRequest) returns (GetBranchsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/stores/{store_id}/branches"
+    };
+  }
+  rpc DeleteBranch(DeleteBranchRequest) returns (DeleteBranchResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/branches/{id}"
+      body: "*"
+    };
+  }
+  // END COUNTERPART
+}

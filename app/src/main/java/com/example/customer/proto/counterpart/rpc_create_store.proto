@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package vou.proto;
+
+import "counterpart/store.proto";
+
+option go_package = "VOU-Server/proto/gen";
+
+message CreateStoreRequest {
+  string name = 1;
+  string owner = 2;
+  string business_type = 3;
+}
+
+message CreateStoreResponse {
+  Store store = 1;
+}
