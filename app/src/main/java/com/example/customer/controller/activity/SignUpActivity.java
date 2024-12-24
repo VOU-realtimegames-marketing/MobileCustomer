@@ -1,11 +1,11 @@
 package com.example.customer.controller.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,13 +13,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
-
-import androidx.appcompat.app.AlertDialog;
 
 import com.example.customer.Config.Config;
 import com.example.customer.R;
+import com.example.customer.utils.PopUpUtils;
+import com.example.customer.utils.TextWatcherUtils;
 import com.example.customer.utils.Utils;
 
 import io.grpc.ManagedChannel;
@@ -28,12 +27,12 @@ import vou.proto.GatewayGrpc;
 import vou.proto.RpcCreateUser;
 import vou.proto.RpcVerifyEmail;
 
-public class SignUpActivity extends Activity implements TextWatcher {
+public class SignUpActivity extends Activity {
     EditText edtFullName, edtUserName, edtEmail, edtPassword, edtReTypePassword;
-    TextView txtErrorMsgPassword, txtErrorMsgEmail, txtErrorMsgUserName, txtErrorMsgFullName;
+    TextView txtErrorMsgPassword, txtErrorMsgEmail, txtErrorMsgUserName, txtErrorMsgFullName,txtErrorMsg;
     Button btnSignUp, btnLogIn;
-    AlertDialog.Builder builder;
-    AlertDialog dialog;
+    android.app.AlertDialog.Builder builderWaiting=null;
+    AlertDialog dialogWaiting=null;
     Handler handler=new Handler();
 
 
@@ -56,12 +55,15 @@ public class SignUpActivity extends Activity implements TextWatcher {
         txtErrorMsgEmail = (TextView) findViewById(R.id.txtErrorMsgEmail);
         txtErrorMsgUserName = (TextView) findViewById(R.id.txtErrorMsgUserName);
         txtErrorMsgFullName = (TextView) findViewById(R.id.txtErrorMsgFullName);
+        txtErrorMsg=(TextView)findViewById(R.id.txtErrorMsg);
 
-        edtFullName.addTextChangedListener(this);
-        edtUserName.addTextChangedListener(this);
-        edtEmail.addTextChangedListener(this);
-        edtPassword.addTextChangedListener(this);
-        edtReTypePassword.addTextChangedListener(this);
+        edtFullName.addTextChangedListener(TextWatcherUtils.createTextWatcher(txtErrorMsgFullName,txtErrorMsg));
+        edtUserName.addTextChangedListener(TextWatcherUtils.createTextWatcher(txtErrorMsgUserName,txtErrorMsg));
+        edtEmail.addTextChangedListener(TextWatcherUtils.createTextWatcher(txtErrorMsgEmail,txtErrorMsg));
+
+        TextWatcher textWatcherPassword=TextWatcherUtils.createTextWatcher(txtErrorMsgPassword,txtErrorMsg);
+        edtPassword.addTextChangedListener(textWatcherPassword);
+        edtReTypePassword.addTextChangedListener(textWatcherPassword);
 
 
         btnLogIn.setOnClickListener(new View.OnClickListener() {
@@ -93,7 +95,13 @@ public class SignUpActivity extends Activity implements TextWatcher {
 
 
                 if(err_fullName.isEmpty()&&err_userName.isEmpty()&&err_email.isEmpty()&&err_password.isEmpty()){
-                    new CheckSignUp().execute(fullName,userName,email,password);
+                    if(builderWaiting==null){
+                        builderWaiting=PopUpUtils.createBuilderWaiting(SignUpActivity.this);
+                        dialogWaiting=builderWaiting.create();
+                    }
+                    CheckSignUp checkSignUp=new CheckSignUp();
+                    checkSignUp.set_dialogWaiting(dialogWaiting);
+                    checkSignUp.execute(fullName,userName,email,password);
                 }
                 else{
                     txtErrorMsgFullName.setText(err_fullName);
@@ -107,15 +115,16 @@ public class SignUpActivity extends Activity implements TextWatcher {
     }
 
     private class CheckSignUp extends AsyncTask<String,Void, RpcCreateUser.CreateUserResponse>{
+        private AlertDialog _dialogWaiting;
+
+        public void set_dialogWaiting(AlertDialog _dialogWaiting) {
+            this._dialogWaiting = _dialogWaiting;
+        }
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            builder=new AlertDialog.Builder(SignUpActivity.this);
-            builder.setCancelable(false);
-
-            builder.setView(getLayoutInflater().inflate(R.layout.popup_waiting,null));
-            dialog=builder.create();
-            dialog.show();
+            _dialogWaiting.show();
         }
 
         @Override
@@ -146,7 +155,7 @@ public class SignUpActivity extends Activity implements TextWatcher {
                 handler.post(new Runnable(){
                     @Override
                     public void run() {
-                        txtErrorMsgPassword.setText(e.getMessage());
+                        txtErrorMsg.setText(e.getMessage());
                     }
                 });
 
@@ -162,41 +171,54 @@ public class SignUpActivity extends Activity implements TextWatcher {
         @Override
         protected void onPostExecute(RpcCreateUser.CreateUserResponse response) {
             super.onPostExecute(response);
-            dialog.dismiss();
+            _dialogWaiting.dismiss();
             if(response!=null){
-//                showSuccessDialog();
-                AlertDialog.Builder builder = new AlertDialog.Builder(SignUpActivity.this);
+                AlertDialog.Builder builderVerify = new AlertDialog.Builder(SignUpActivity.this);
 
-                builder.setTitle("Verify OTP");
+                builderVerify.setTitle("Verify OTP");
 
-                builder.setMessage("Enter the 6-digit OTP code sent via email");
-
+                builderVerify.setMessage("Enter the 6-digit OTP code sent via email");
 
                 LayoutInflater inflater = getLayoutInflater();
                 View dialogView = inflater.inflate(R.layout.popup_verify_email, null);
-                builder.setView(dialogView);
+                builderVerify.setView(dialogView);
                 EditText edtOTP = dialogView.findViewById(R.id.edtOTP);
-                builder.setPositiveButton("Verify", new DialogInterface.OnClickListener() {
+                TextView errOTP=dialogView.findViewById(R.id.txtErrorMsg);
+                TextView txtVerify=dialogView.findViewById(R.id.txtVerify);
+                TextView txtCancel=dialogView.findViewById(R.id.txtCancel);
+                edtOTP.addTextChangedListener(TextWatcherUtils.createTextWatcher(errOTP));
+
+                AlertDialog dialogVerify = builderVerify.create();
+                dialogVerify.show();
+
+                txtVerify.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onClick(View v) {
                         String otp = edtOTP.getText().toString();
-                        if (otp.isEmpty()) {
-
+                        Log.e("OTP","OTP"+otp);
+                        if (otp.length()<6) {
+                            errOTP.setText("OTP must be 6 digits");
                         } else {
-                            // Xử lý logic xác thực OTP tại đây
-
-                            new VerifyOTP(dialog).execute(response.getUser().getEmail(),otp);
+                            if(builderWaiting==null){
+                                builderWaiting=PopUpUtils.createBuilderWaiting(SignUpActivity.this);
+                                dialogWaiting=builderWaiting.create();
+                            }
+                            VerifyOTP verifyOTP=new VerifyOTP();
+                            verifyOTP.setDialogVerify(dialogVerify);
+                            verifyOTP.set_dialogWaiting(dialogWaiting);
+                            verifyOTP.setErrorOTP(errOTP);
+                            verifyOTP.execute(response.getUser().getEmail(),otp);
                         }
                     }
                 });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                txtCancel.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
+                    public void onClick(View v) {
+                        dialogVerify.dismiss();
                     }
                 });
-                AlertDialog alertDialog = builder.create();
-                alertDialog.show();
+
             }
 //            else{
 //                txtErrorMsgPassword.setText("Invalid information");
@@ -205,21 +227,27 @@ public class SignUpActivity extends Activity implements TextWatcher {
     }
 
     private class VerifyOTP extends AsyncTask<String,Void, RpcVerifyEmail.VerifyEmailResponse>{
-        private DialogInterface dialog1;
+        private AlertDialog dialogVerify;
+        private AlertDialog _dialogWaiting;
+        private TextView errorOTP;
 
-        public VerifyOTP(DialogInterface dialog1) {
-            this.dialog1 = dialog1;
+        public void setDialogVerify(AlertDialog dialogVerify) {
+            this.dialogVerify = dialogVerify;
+        }
+
+        public void set_dialogWaiting(AlertDialog _dialogWaiting) {
+            this._dialogWaiting = _dialogWaiting;
+        }
+
+        public void setErrorOTP(TextView errorOTP) {
+            this.errorOTP = errorOTP;
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            builder=new AlertDialog.Builder(SignUpActivity.this);
-            builder.setCancelable(false);
 
-            builder.setView(getLayoutInflater().inflate(R.layout.popup_waiting,null));
-            dialog=builder.create();
-            dialog.show();
+            _dialogWaiting.show();
         }
 
         @Override
@@ -256,18 +284,17 @@ public class SignUpActivity extends Activity implements TextWatcher {
         @Override
         protected void onPostExecute(RpcVerifyEmail.VerifyEmailResponse verifyEmailResponse) {
             super.onPostExecute(verifyEmailResponse);
-            dialog.dismiss();
+            dialogWaiting.dismiss();
             if(verifyEmailResponse!=null){
-//                showSuccessDialog();
-                dialog1.dismiss();
+                dialogVerify.dismiss();
                 showSuccessDialog();
+            }
+            else{
+                errorOTP.setText("Invalid OTP");
             }
         }
     }
 
-    private void showVerifyOTP(){
-
-    }
 
     private void showSuccessDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -290,24 +317,6 @@ public class SignUpActivity extends Activity implements TextWatcher {
 
         AlertDialog dialog = builder.create();
         dialog.show();
-
-    }
-
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-    }
-
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-        txtErrorMsgPassword.setText("");
-        txtErrorMsgEmail.setText("");
-        txtErrorMsgUserName.setText("");
-        txtErrorMsgFullName.setText("");
-    }
-
-    @Override
-    public void afterTextChanged(Editable s) {
 
     }
 }

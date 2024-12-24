@@ -22,12 +22,12 @@
         android:hint="Email"/>
 
     <TextView
-        android:id="@+id/txtErrorEmail"
+        android:id="@+id/txtErrorMsgEmail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="20sp"
         android:layout_marginTop="10dp"
-        android:textColor="#F00707"/>
+        android:textColor="@color/error_color"/>
 
 
     <EditText
@@ -40,12 +40,20 @@
         />
 
     <TextView
+        android:id="@+id/txtErrorMsgPassWord"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/error_color"/>
+
+    <TextView
         android:id="@+id/txtErrorMsg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="20sp"
         android:layout_marginTop="10dp"
-        android:textColor="#F00707"/>
+        android:textColor="@color/error_color"/>
 
     <Button
         android:id="@+id/btnLogIn"

@@ -27,11 +27,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text=""
-        android:textColor="#F00707"/>
+        android:textColor="@color/error_color"/>
 
     <EditText
         android:id="@+id/edtUserName"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="15dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="User Name"/>
@@ -41,11 +41,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text=""
-        android:textColor="#F00707"/>
+        android:textColor="@color/error_color"/>
 
     <EditText
         android:id="@+id/edtEmail"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="15dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Email"/>
@@ -55,14 +55,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text=""
-        android:textColor="#F00707"/>
+        android:textColor="@color/error_color"/>
 
     <EditText
         android:id="@+id/edtPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Password"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="15dp"
         android:inputType="textPassword"
         />
 
@@ -71,7 +71,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="ReType Password"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="15dp"
         android:inputType="textPassword"
         />
 
@@ -83,7 +83,16 @@
         android:textSize="15sp"
         android:layout_marginTop="10dp"
         android:text=""
-        android:textColor="#F00707"/>
+        android:textColor="@color/error_color"/>
+
+    <TextView
+        android:id="@+id/txtErrorMsg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:layout_marginTop="10dp"
+        android:text=""
+        android:textColor="@color/error_color"/>
 
     <Button
         android:id="@+id/btnSignUp"
