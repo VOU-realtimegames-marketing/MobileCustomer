@@ -8,10 +8,12 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import androidx.appcompat.app.AlertDialog;
@@ -24,6 +26,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import vou.proto.GatewayGrpc;
 import vou.proto.RpcCreateUser;
+import vou.proto.RpcVerifyEmail;
 
 public class SignUpActivity extends Activity implements TextWatcher {
     EditText edtFullName, edtUserName, edtEmail, edtPassword, edtReTypePassword;
@@ -161,12 +164,109 @@ public class SignUpActivity extends Activity implements TextWatcher {
             super.onPostExecute(response);
             dialog.dismiss();
             if(response!=null){
-                showSuccessDialog();
+//                showSuccessDialog();
+                AlertDialog.Builder builder = new AlertDialog.Builder(SignUpActivity.this);
+
+                builder.setTitle("Verify OTP");
+
+                builder.setMessage("Enter the 6-digit OTP code sent via email");
+
+
+                LayoutInflater inflater = getLayoutInflater();
+                View dialogView = inflater.inflate(R.layout.popup_verify_email, null);
+                builder.setView(dialogView);
+                EditText edtOTP = dialogView.findViewById(R.id.edtOTP);
+                builder.setPositiveButton("Verify", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String otp = edtOTP.getText().toString();
+                        if (otp.isEmpty()) {
+
+                        } else {
+                            // Xử lý logic xác thực OTP tại đây
+
+                            new VerifyOTP(dialog).execute(response.getUser().getEmail(),otp);
+                        }
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
             }
 //            else{
 //                txtErrorMsgPassword.setText("Invalid information");
 //            }
         }
+    }
+
+    private class VerifyOTP extends AsyncTask<String,Void, RpcVerifyEmail.VerifyEmailResponse>{
+        private DialogInterface dialog1;
+
+        public VerifyOTP(DialogInterface dialog1) {
+            this.dialog1 = dialog1;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            builder=new AlertDialog.Builder(SignUpActivity.this);
+            builder.setCancelable(false);
+
+            builder.setView(getLayoutInflater().inflate(R.layout.popup_waiting,null));
+            dialog=builder.create();
+            dialog.show();
+        }
+
+        @Override
+        protected RpcVerifyEmail.VerifyEmailResponse doInBackground(String... params) {
+            String email=params[0];
+            String otp=params[1];
+
+            ManagedChannel channel=null;
+            try{
+                channel=ManagedChannelBuilder.forAddress(Config.ip,Config.port)
+                        .usePlaintext()
+                        .build();
+
+                GatewayGrpc.GatewayBlockingStub blockingStub=GatewayGrpc.newBlockingStub(channel);
+                RpcVerifyEmail.VerifyEmailRequest request= RpcVerifyEmail.VerifyEmailRequest.newBuilder()
+                        .setEmail(email)
+                        .setSecretCode(otp)
+                        .build();
+
+                RpcVerifyEmail.VerifyEmailResponse response=blockingStub.verifyEmail(request);
+                return response;
+            }
+            catch (Exception e){
+
+            }
+            finally {
+                if (channel != null) {
+                    channel.shutdown();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(RpcVerifyEmail.VerifyEmailResponse verifyEmailResponse) {
+            super.onPostExecute(verifyEmailResponse);
+            dialog.dismiss();
+            if(verifyEmailResponse!=null){
+//                showSuccessDialog();
+                dialog1.dismiss();
+                showSuccessDialog();
+            }
+        }
+    }
+
+    private void showVerifyOTP(){
+
     }
 
     private void showSuccessDialog() {

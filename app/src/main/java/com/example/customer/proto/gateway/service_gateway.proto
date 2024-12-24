@@ -7,6 +7,7 @@ import "auth/rpc_create_user.proto";
 import "auth/rpc_login_user.proto";
 import "auth/rpc_authorize_user.proto";
 import "auth/rpc_renew_access_token.proto";
+import "auth/rpc_verify_email.proto";
 
 import "counterpart/rpc_create_store.proto";
 import "counterpart/rpc_get_stores_of_owner.proto";
@@ -44,6 +45,7 @@ service Gateway {
       body: "*"
     };
   }
+  rpc VerifyEmail(VerifyEmailRequest) returns (VerifyEmailResponse) {}
   // END AUTH
 
   // BEGIN COUNTERPART
