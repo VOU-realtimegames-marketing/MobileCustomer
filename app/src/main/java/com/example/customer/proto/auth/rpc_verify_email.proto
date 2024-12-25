@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package vou.proto;
+
+option go_package = "VOU-Server/proto/gen";
+
+message VerifyEmailRequest {
+  string email = 1;
+  string secret_code = 2;
+}
+
+message VerifyEmailResponse {
+  bool is_verified = 1;
+}

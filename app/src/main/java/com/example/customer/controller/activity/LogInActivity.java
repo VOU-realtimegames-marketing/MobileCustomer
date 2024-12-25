@@ -3,11 +3,8 @@ package com.example.customer.controller.activity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,21 +13,23 @@ import android.widget.TextView;
 
 import com.example.customer.Config.Config;
 import com.example.customer.R;
+import com.example.customer.utils.PopUpUtils;
+import com.example.customer.utils.TextWatcherUtils;
 import com.example.customer.utils.Utils;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import vou.proto.GatewayGrpc;
 import vou.proto.RpcLoginUser;
-import vou.proto.UserOuterClass;
 
 
-public class LogInActivity extends Activity implements TextWatcher{
+
+public class LogInActivity extends Activity{
     EditText edtEmail,edtPassword;
-    TextView txtErrorEmail,txtErrorMsg;
+    TextView txtErrorMsgEmail,txtErrorMsgPassWord,txtErrorMsg;
     Button btnSignUp,btnLogIn;
-    AlertDialog.Builder builder;
-    AlertDialog dialog;
+    AlertDialog.Builder builderWaiting=null;
+    AlertDialog dialogWaiting;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,13 +39,14 @@ public class LogInActivity extends Activity implements TextWatcher{
         edtPassword=(EditText) findViewById(R.id.edtPassword);
 
         txtErrorMsg=(TextView) findViewById(R.id.txtErrorMsg);
-        txtErrorEmail=(TextView) findViewById(R.id.txtErrorEmail);
+        txtErrorMsgEmail=(TextView) findViewById(R.id.txtErrorMsgEmail);
+        txtErrorMsgPassWord=(TextView) findViewById(R.id.txtErrorMsgPassWord);
 
         btnSignUp=(Button) findViewById(R.id.btnSignUp);
         btnLogIn=(Button) findViewById(R.id.btnLogIn);
 
-        edtPassword.addTextChangedListener(this);
-        edtEmail.addTextChangedListener(this);
+        edtPassword.addTextChangedListener(TextWatcherUtils.createTextWatcher(txtErrorMsgPassWord,txtErrorMsg));
+        edtEmail.addTextChangedListener(TextWatcherUtils.createTextWatcher(txtErrorMsgEmail,txtErrorMsg));
 
         btnLogIn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,13 +55,19 @@ public class LogInActivity extends Activity implements TextWatcher{
                 String password=edtPassword.getText().toString();
 
                 String errorEmail=Utils.checkEmail(email);
-//                String errorPassword=Utils.checkPasswordComplexity(password);
-                if(errorEmail.isEmpty()) {
-                    new CheckLogIn().execute(email, password);
+                String errorPassword=Utils.checkPasswordComplexity(password);
+                if(errorEmail.isEmpty()&&errorPassword.isEmpty()) {
+                    if(builderWaiting==null){
+                        builderWaiting=PopUpUtils.createBuilderWaiting(LogInActivity.this);
+                        dialogWaiting=builderWaiting.create();
+                    }
+                    CheckLogIn checkLogIn=new CheckLogIn();
+                    checkLogIn.set_dialogWaiting(dialogWaiting);
+                    checkLogIn.execute(email, password);
                 }
                 else{
-                    txtErrorEmail.setText(errorEmail);
-//                    txtErrorMsg.setText(errorPassword);
+                    txtErrorMsgEmail.setText(errorEmail);
+                    txtErrorMsgPassWord.setText(errorPassword);
                 }
             }
         });
@@ -74,32 +80,17 @@ public class LogInActivity extends Activity implements TextWatcher{
         });
     }
 
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-    }
-
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-        txtErrorMsg.setText("");
-        txtErrorEmail.setText("");
-    }
-
-    @Override
-    public void afterTextChanged(Editable s) {
-
-    }
-
     private class CheckLogIn extends AsyncTask<String,Void, RpcLoginUser.LoginUserResponse>{
+        private AlertDialog _dialogWaiting;
+
+        public void set_dialogWaiting(AlertDialog _dialogWaiting) {
+            this._dialogWaiting = _dialogWaiting;
+        }
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            builder=new AlertDialog.Builder(LogInActivity.this);
-            builder.setCancelable(false);
-
-            builder.setView(getLayoutInflater().inflate(R.layout.popup_waiting,null));
-            dialog=builder.create();
-            dialog.show();
+            _dialogWaiting.show();
         }
 
         @Override
@@ -135,7 +126,7 @@ public class LogInActivity extends Activity implements TextWatcher{
         @Override
         protected void onPostExecute(RpcLoginUser.LoginUserResponse response) {
             super.onPostExecute(response);
-            dialog.dismiss();
+            _dialogWaiting.dismiss();
             if(response==null){
                 txtErrorMsg.setText("Invalid username or password");
                 return ;

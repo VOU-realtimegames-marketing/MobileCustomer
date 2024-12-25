@@ -6,6 +6,7 @@ import "auth/rpc_create_user.proto";
 import "auth/rpc_login_user.proto";
 import "auth/rpc_authorize_user.proto";
 import "auth/rpc_renew_access_token.proto";
+import "auth/rpc_verify_email.proto";
 
 option go_package = "VOU-Server/proto/gen";
 
@@ -14,4 +15,5 @@ service AuthService {
   rpc LoginUser(LoginUserRequest) returns (LoginUserResponse) {}
   rpc AuthorizeUser(AuthorizeRequest) returns (AuthorizeResponse) {}
   rpc RenewAccessToken(RenewAccessTokenRequest) returns (RenewAccessTokenResponse) {}
+  rpc VerifyEmail(VerifyEmailRequest) returns (VerifyEmailResponse) {}
 }
