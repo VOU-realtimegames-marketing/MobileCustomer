@@ -2,7 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@drawable/background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,6 +23,7 @@
             android:layout_height="wrap_content"
             android:textSize="24sp"
             android:layout_marginTop="16dp"
+            android:fontFamily="@font/timesnewroman"
             android:text="Event Name">
         </TextView>
 
@@ -31,6 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Games"
+            android:fontFamily="@font/timesnewroman"
             android:layout_marginTop="8dp">
         </TextView>
 
@@ -39,6 +41,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Start Time"
+            android:fontFamily="@font/timesnewroman"
             android:layout_marginTop="8dp">
         </TextView>
 
@@ -47,6 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="End Time"
+            android:fontFamily="@font/timesnewroman"
             android:layout_marginTop="8dp">
         </TextView>
 
@@ -55,6 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Voucher Quantity"
+            android:fontFamily="@font/timesnewroman"
             android:layout_marginTop="8dp">
         </TextView>
 
@@ -63,6 +68,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:fontFamily="@font/timesnewroman"
+            android:background="@drawable/button_background"
+            android:textColor="@color/white"
+            android:layout_gravity="center"
             android:text="Add to Wishlist">
         </Button>
 

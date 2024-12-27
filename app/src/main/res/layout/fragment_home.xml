@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@drawable/background"
     android:id="@+id/fragment_container">
 
     <LinearLayout
@@ -15,6 +16,7 @@
             android:layout_height="wrap_content"
             android:text="Events"
             android:textSize="24sp"
+            android:fontFamily="@font/timesnewroman"
             android:gravity="center">
         </TextView>
 
@@ -31,6 +33,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:fontFamily="@font/timesnewroman"
+                android:background="@drawable/button_background"
+                android:textColor="@color/white"
                 android:text="Wishlist Events">
             </Button>
 
@@ -39,6 +44,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:fontFamily="@font/timesnewroman"
+                android:background="@drawable/button_background"
+                android:textColor="@color/white"
                 android:text="Upcoming Events">
             </Button>
         </LinearLayout>
