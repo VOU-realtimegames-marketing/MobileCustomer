@@ -1,5 +1,6 @@
 package com.example.customer.controller.fragment;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -11,6 +12,11 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.example.customer.R;
 import com.example.customer.sensors.ShakeDetector;
@@ -26,6 +32,10 @@ public class FragmentShakeGame extends Fragment {
     private Handler shakeHandler = new Handler();
     private Runnable shakeTimeoutRunnable;
     private int playTurn;
+    private ImageButton btnBack;
+    private TextView tvPlayTurns;
+    private Button btnShare;
+    private Button btnAskFriends;
 
 
 
@@ -67,14 +77,78 @@ public class FragmentShakeGame extends Fragment {
         if(playTurn > 0){
             //Gọi logic
             playTurn -= 1;
+
+            //Random from 0 to 9
+            int random = (int) (Math.random() * 9);
+            if(random >4){
+                openReceiveVoucherDialog(true);
+            }
+            else{
+                openReceiveVoucherDialog(false);
+            }
         }
+    }
+
+    private void openReceiveVoucherDialog(boolean isWin) {
+        //Gọi logic
+        final Dialog dialog = new Dialog(getContext());
+        dialog.setContentView(R.layout.dialog_receive_voucher);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+//        Window window = dialog.getWindow();
+//        if(window == null){
+//            return;
+//        }
+//
+//        window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+//        window.setBackgroundDrawableResource(android.R.color.transparent);
+//
+//        WindowManager.LayoutParams windowAttributes = window.getAttributes();
+//        windowAttributes.gravity = Gravity
+
+        TextView tvMsg = dialog.findViewById(R.id.tvMsg);
+        TextView tvVoucher = dialog.findViewById(R.id.tvVoucher);
+        Button btnReceive = dialog.findViewById(R.id.btnReceive);
+
+        if(isWin){
+            tvMsg.setText("Chúc mừng bạn đã trúng thưởng");
+            tvVoucher.setText("Voucher 100.000đ");
+            btnReceive.setText("Nhận");
+        }
+        else{
+            tvMsg.setText("Rất tiếc, bạn chưa trúng thưởng");
+            tvVoucher.setText("");
+            btnReceive.setText("Thử lại");
+        }
+
+        btnReceive.setOnClickListener(v -> {
+            dialog.dismiss();
+        });
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_shake_game, container, false);
+        View view = inflater.inflate(R.layout.fragment_shake_game, container, false);
+        btnBack = view.findViewById(R.id.btnBack);
+        tvPlayTurns = view.findViewById(R.id.tvShakeCount);
+        btnShare = view.findViewById(R.id.btnShare);
+        btnAskFriends = view.findViewById(R.id.btnAskFriends);
+
+        btnBack.setOnClickListener(v -> {
+            //Back
+            requireActivity().getSupportFragmentManager().popBackStack();
+        });
+
+        tvPlayTurns.setText("Lượt chơi" + String.valueOf(playTurn));
+
+        btnShare.setOnClickListener(v -> {
+            //Share
+
+        });
+        return view;
+
     }
 
     @Override
