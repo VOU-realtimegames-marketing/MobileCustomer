@@ -2,6 +2,7 @@ package com.example.customer.controller.fragment;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -28,10 +29,10 @@ public class FragmentShakeGame extends Fragment {
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
     private ShakeDetector mShakeDetector;
-    private static final int SHAKE_TIMEOUT = 3000; // 1 giây
+    private static final int SHAKE_TIMEOUT = 3000; // 3 giây
     private Handler shakeHandler = new Handler();
     private Runnable shakeTimeoutRunnable;
-    private int playTurn;
+    private int playTurn = 3;
     private ImageButton btnBack;
     private TextView tvPlayTurns;
     private Button btnShare;
@@ -145,7 +146,13 @@ public class FragmentShakeGame extends Fragment {
 
         btnShare.setOnClickListener(v -> {
             //Share
+            Intent sendIntent = new Intent(Intent.ACTION_SEND);
+            sendIntent.setType("text/plain");
+            String context = "Chơi game cùng tôi";
+            sendIntent.putExtra(Intent.EXTRA_TEXT, context);
+            startActivity(Intent.createChooser(sendIntent, "Chia sẻ"));
 
+            playTurn += 1;
         });
         return view;
 
