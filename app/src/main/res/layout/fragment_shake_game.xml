@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background"
     tools:context=".controller.fragment.FragmentShakeGame">
 
     <!-- Back button -->
@@ -12,7 +13,7 @@
     android:layout_height="48dp"
     android:layout_margin="16dp"
     android:src="@drawable/ic_back"
-    android:background="@color/white"
+    android:background="@drawable/button_background"
     android:contentDescription="Back"/>
 
     <!--Name of the game -->
@@ -71,6 +72,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
+                android:fontFamily="@font/timesnewroman"
+                android:background="@drawable/button_background"
+                android:textColor="@color/white"
                 android:text="Chia sẻ" />
 
             <!-- Ask friends button -->
@@ -79,6 +83,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
+                android:fontFamily="@font/timesnewroman"
+                android:background="@drawable/button_background"
+                android:textColor="@color/white"
                 android:text="Hỏi bạn bè" />
         </LinearLayout>
 

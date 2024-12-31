@@ -10,11 +10,11 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -69,15 +69,19 @@ public class FragmentShakeGame extends Fragment {
                 };
 
                 shakeHandler.postDelayed(shakeTimeoutRunnable, SHAKE_TIMEOUT);
+
             }
         });
 
     }
 
     private void handleShakeComplete() {
+        //Log handleShakeComplete
+        Log.d("Shake", "Shake complete");
         if(playTurn > 0){
             //Gọi logic
             playTurn -= 1;
+            tvPlayTurns.setText("Lượt chơi: " + String.valueOf(playTurn));
 
             //Random from 0 to 9
             int random = (int) (Math.random() * 9);
@@ -93,19 +97,12 @@ public class FragmentShakeGame extends Fragment {
     private void openReceiveVoucherDialog(boolean isWin) {
         //Gọi logic
         final Dialog dialog = new Dialog(getContext());
-        dialog.setContentView(R.layout.dialog_receive_voucher);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_receive_voucher);
 
-//        Window window = dialog.getWindow();
-//        if(window == null){
-//            return;
-//        }
-//
-//        window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
-//        window.setBackgroundDrawableResource(android.R.color.transparent);
-//
-//        WindowManager.LayoutParams windowAttributes = window.getAttributes();
-//        windowAttributes.gravity = Gravity
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
 
         TextView tvMsg = dialog.findViewById(R.id.tvMsg);
         TextView tvVoucher = dialog.findViewById(R.id.tvVoucher);
@@ -125,6 +122,8 @@ public class FragmentShakeGame extends Fragment {
         btnReceive.setOnClickListener(v -> {
             dialog.dismiss();
         });
+
+        dialog.show();
     }
 
     @Override
@@ -142,7 +141,7 @@ public class FragmentShakeGame extends Fragment {
             requireActivity().getSupportFragmentManager().popBackStack();
         });
 
-        tvPlayTurns.setText("Lượt chơi" + String.valueOf(playTurn));
+        tvPlayTurns.setText("Lượt chơi: " + String.valueOf(playTurn));
 
         btnShare.setOnClickListener(v -> {
             //Share
@@ -153,6 +152,7 @@ public class FragmentShakeGame extends Fragment {
             startActivity(Intent.createChooser(sendIntent, "Chia sẻ"));
 
             playTurn += 1;
+            tvPlayTurns.setText("Lượt chơi: " + String.valueOf(playTurn));
         });
         return view;
 
