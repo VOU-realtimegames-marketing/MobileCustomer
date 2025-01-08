@@ -9,7 +9,6 @@ import com.example.customer.controller.fragment.FragmentGame;
 import com.example.customer.controller.fragment.FragmentHome;
 import com.example.customer.controller.fragment.FragmentLocation;
 import com.example.customer.controller.fragment.FragmentProfile;
-import com.example.customer.controller.fragment.FragmentShakeGame;
 import com.example.customer.controller.fragment.FragmentVoucher;
 
 public class ViewPagerAdapter extends FragmentStateAdapter {
@@ -23,7 +22,6 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
         switch (position){
             case 0:return new FragmentHome();
             case 1:return new FragmentVoucher();
-//            case 2:return new FragmentShakeGame();
             case 2:return new FragmentGame();
             case 3:return new FragmentLocation();
             case 4:return new FragmentProfile();

@@ -1,13 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/background"
+    android:id="@+id/fragment_container">
 
-    <TextView
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="This is game page"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Games"
+            android:textSize="24sp"
+            android:fontFamily="@font/timesnewroman"
+            android:gravity="center">
+        </TextView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:gravity="center">
+
+
+            <Button
+                android:id="@+id/btn_start_game"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/timesnewroman"
+                android:background="@drawable/button_background"
+                android:textColor="@color/white"
+                android:text="About to Start Games">
+            </Button>
+
+            <Button
+                android:id="@+id/btn_upcoming_game"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/timesnewroman"
+                android:background="@drawable/button_background"
+                android:textColor="@color/white"
+                android:text="Upcoming Games">
+            </Button>
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/list_games"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </ListView>
+
+    </LinearLayout>
+
 </FrameLayout>
