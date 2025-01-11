@@ -106,7 +106,7 @@ public class FragmentQuizGame extends Fragment {
 
             @Override
             public void onFinish() {
-                showResult(false); // Không trả lời kịp
+                showResult(false);
             }
         };
         questionTimer.start();

@@ -27,7 +27,7 @@ public class FragmentGameDetail extends Fragment {
 
         if (getArguments() != null) {
             game = (Game) getArguments().getSerializable("game");
-            isAboutoStartGame = getArguments().getBoolean("isInWishlist", false);
+            isAboutoStartGame = getArguments().getBoolean("isAboutoStartGame", false);
         }
     }
 
@@ -46,19 +46,19 @@ public class FragmentGameDetail extends Fragment {
         if (game != null) {
             gameImage.setImageResource(game.getGameImage());
             gameName.setText(game.getGameName());
-            gameType.setText(game.getType());
+            gameType.setText("Type" + game.getType());
             gameStartTime.setText("Start: " + game.getStartTime());
             gameEndTime.setText("End: " + game.getEndTime());
         }
 
-        if (!isAboutoStartGame) {
-            joinGameButton.setVisibility(View.GONE);
-        } else {
+        if (isAboutoStartGame) {
             joinGameButton.setVisibility(View.VISIBLE);
             joinGameButton.setOnClickListener(v -> {
 
                 joinGame(game);
             });
+        } else {
+            joinGameButton.setVisibility(View.GONE);
         }
 
         return view;
