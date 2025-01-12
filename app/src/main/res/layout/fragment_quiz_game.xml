@@ -3,20 +3,23 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
+    android:fitsSystemWindows="true"
     android:background="@drawable/background">
 
     <TextView
         android:id="@+id/questionText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="18sp" />
+        android:textSize="18sp">
+    </TextView>
 
     <TextView
         android:id="@+id/timerText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="16sp"
-        android:gravity="end" />
+        android:gravity="end">
+    </TextView>
 
     <TextView
         android:id="@+id/resultText"
@@ -24,7 +27,8 @@
         android:layout_height="wrap_content"
         android:textSize="20sp"
         android:gravity="center"
-        android:visibility="gone" />
+        android:visibility="gone">
+    </TextView>
 
     <GridLayout
         android:layout_width="match_parent"
@@ -39,7 +43,11 @@
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
             android:layout_rowWeight="1"
-            android:layout_margin="8dp" />
+            android:layout_margin="8dp"
+            android:padding="16dp"
+            android:textSize="18sp"
+            android:background="@drawable/option_background">
+        </Button>
 
         <Button
             android:id="@+id/option2"
@@ -47,7 +55,11 @@
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
             android:layout_rowWeight="1"
-            android:layout_margin="8dp" />
+            android:layout_margin="8dp"
+            android:padding="16dp"
+            android:textSize="18sp"
+            android:background="@drawable/option_background">
+        </Button>
 
         <Button
             android:id="@+id/option3"
@@ -55,7 +67,11 @@
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
             android:layout_rowWeight="1"
-            android:layout_margin="8dp" />
+            android:layout_margin="8dp"
+            android:padding="16dp"
+            android:textSize="18sp"
+            android:background="@drawable/option_background">
+        </Button>
 
         <Button
             android:id="@+id/option4"
@@ -63,6 +79,10 @@
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
             android:layout_rowWeight="1"
-            android:layout_margin="8dp" />
+            android:layout_margin="8dp"
+            android:padding="16dp"
+            android:textSize="18sp"
+            android:background="@drawable/option_background">
+        </Button>
     </GridLayout>
 </LinearLayout>

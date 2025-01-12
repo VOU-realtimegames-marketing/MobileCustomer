@@ -79,7 +79,7 @@ public class FragmentGameDetail extends Fragment {
 
     private long calculateQuizEndTime() {
         Calendar quizEndCalendar = Calendar.getInstance();
-        quizEndCalendar.set(Calendar.HOUR_OF_DAY, 10);
+        quizEndCalendar.set(Calendar.HOUR_OF_DAY, 23);
         quizEndCalendar.set(Calendar.MINUTE, 37);
         quizEndCalendar.set(Calendar.SECOND, 30);
         return quizEndCalendar.getTimeInMillis();

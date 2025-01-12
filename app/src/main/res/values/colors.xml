@@ -4,4 +4,8 @@
     <color name="white">#FFFFFFFF</color>
     <color name="checked_false">#000000</color>
     <color name="error_color">#F00707</color>
+    <color name="defaultColor">#B3B8FF</color>
+    <color name="pressedColor">#B367FB</color>
+    <color name="correctColor">#63E067</color>
+    <color name="wrongColor">#E46359</color>
 </resources>

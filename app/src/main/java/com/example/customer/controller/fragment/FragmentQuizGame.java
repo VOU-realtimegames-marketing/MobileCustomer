@@ -24,12 +24,14 @@ public class FragmentQuizGame extends Fragment {
     private Button option1, option2, option3, option4;
     private Game game;
     private int correctAnswers = 0;
-    private int questionNumber = 1;
+    private int questionNumber = 3;
     private int currentQuestionIndex = 0;
     private Question question;
     private CountDownTimer questionTimer, resultTimer;
     private boolean isAnswerSelected = false;
     private boolean isCorrect = false;
+
+    private Button selectedOption;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,6 +57,7 @@ public class FragmentQuizGame extends Fragment {
         option4 = view.findViewById(R.id.option4);
 
         View.OnClickListener optionClickListener = v -> checkAnswer((Button) v);
+
         option1.setOnClickListener(optionClickListener);
         option2.setOnClickListener(optionClickListener);
         option3.setOnClickListener(optionClickListener);
@@ -117,10 +120,12 @@ public class FragmentQuizGame extends Fragment {
         questionTimer.start();
     }
 
-    private void checkAnswer(Button selectedOption) {
+    private void checkAnswer(Button selectedButton) {
         if (isAnswerSelected) return;
         isAnswerSelected = true;
-        isCorrect = selectedOption.getText().toString().equals(question.getAnswer());
+        isCorrect = selectedButton.getText().toString().equals(question.getAnswer());
+        selectedButton.setBackgroundResource(R.drawable.option_background_pressed);
+        selectedOption = selectedButton;
         if (isCorrect) {
             correctAnswers++;
         }
@@ -129,6 +134,25 @@ public class FragmentQuizGame extends Fragment {
     private void showResult(boolean isCorrect) {
         resultText.setVisibility(View.VISIBLE);
         resultText.setText(isCorrect ? "Correct!" : "Wrong!");
+
+        selectedOption.setBackgroundResource(R.drawable.option_background_wrong);
+
+        if (option1.getText().toString().equals(question.getAnswer())) {
+            option1.setBackgroundResource(R.drawable.option_background_correct);
+        }
+        if (option2.getText().toString().equals(question.getAnswer())) {
+            option2.setBackgroundResource(R.drawable.option_background_correct);
+        }
+        if (option3.getText().toString().equals(question.getAnswer())) {
+            option3.setBackgroundResource(R.drawable.option_background_correct);
+        }
+        if (option4.getText().toString().equals(question.getAnswer())) {
+            option4.setBackgroundResource(R.drawable.option_background_correct);
+        }
+
+
+
+
         resultTimer = new CountDownTimer(5000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {}
@@ -136,10 +160,17 @@ public class FragmentQuizGame extends Fragment {
             @Override
             public void onFinish() {
                 currentQuestionIndex++;
+                resetOptionColor();
                 showQuestion();
             }
         };
         resultTimer.start();
+    }
+    private void resetOptionColor() {
+        option1.setBackgroundResource(R.drawable.option_background);
+        option2.setBackgroundResource(R.drawable.option_background);
+        option3.setBackgroundResource(R.drawable.option_background);
+        option4.setBackgroundResource(R.drawable.option_background);
     }
 
     @Override

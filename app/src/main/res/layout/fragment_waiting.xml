@@ -3,6 +3,7 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
+    android:fitsSystemWindows="true"
     android:background="@drawable/background">
     <TextView
         android:id="@+id/countdownText"
@@ -11,6 +12,7 @@
         android:text="Starting in: 00:00:00"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:gravity="center">
+        android:gravity="center"
+        android:fontFamily="@font/timesnewroman">
     </TextView>
 </LinearLayout>
