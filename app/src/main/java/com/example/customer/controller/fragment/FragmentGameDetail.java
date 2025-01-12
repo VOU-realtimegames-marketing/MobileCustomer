@@ -1,5 +1,6 @@
 package com.example.customer.controller.fragment;
 
+import android.icu.util.Calendar;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +20,9 @@ import com.example.customer.data.Game;
 public class FragmentGameDetail extends Fragment {
 
     private Game game;
-    private boolean isAboutoStartGame;
+
+    private long startTimeMillis;
+    private long endTimeMillis;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -27,7 +30,10 @@ public class FragmentGameDetail extends Fragment {
 
         if (getArguments() != null) {
             game = (Game) getArguments().getSerializable("game");
-            isAboutoStartGame = getArguments().getBoolean("isAboutoStartGame", false);
+
+
+            startTimeMillis = calculateQuizStartTime();
+            endTimeMillis = calculateQuizEndTime();
         }
     }
 
@@ -46,17 +52,16 @@ public class FragmentGameDetail extends Fragment {
         if (game != null) {
             gameImage.setImageResource(game.getGameImage());
             gameName.setText(game.getGameName());
-            gameType.setText("Type" + game.getType());
+            gameType.setText("Type: " + game.getType());
             gameStartTime.setText("Start: " + game.getStartTime());
             gameEndTime.setText("End: " + game.getEndTime());
         }
 
-        if (isAboutoStartGame) {
-            joinGameButton.setVisibility(View.VISIBLE);
-            joinGameButton.setOnClickListener(v -> {
 
-                joinGame(game);
-            });
+        long currentTimeMillis = System.currentTimeMillis();
+        if (currentTimeMillis >= startTimeMillis && currentTimeMillis <= endTimeMillis) {
+            joinGameButton.setVisibility(View.VISIBLE);
+            joinGameButton.setOnClickListener(v -> joinGame(game));
         } else {
             joinGameButton.setVisibility(View.GONE);
         }
@@ -64,24 +69,41 @@ public class FragmentGameDetail extends Fragment {
         return view;
     }
 
+    private long calculateQuizStartTime() {
+        Calendar quizStartCalendar = Calendar.getInstance();
+        quizStartCalendar.set(Calendar.HOUR_OF_DAY, 1);
+        quizStartCalendar.set(Calendar.MINUTE, 35);
+        quizStartCalendar.set(Calendar.SECOND, 0);
+        return quizStartCalendar.getTimeInMillis();
+    }
+
+    private long calculateQuizEndTime() {
+        Calendar quizEndCalendar = Calendar.getInstance();
+        quizEndCalendar.set(Calendar.HOUR_OF_DAY, 10);
+        quizEndCalendar.set(Calendar.MINUTE, 37);
+        quizEndCalendar.set(Calendar.SECOND, 30);
+        return quizEndCalendar.getTimeInMillis();
+    }
+
     private void joinGame(Game game) {
-        if (game.getType() == "quiz"){
+        if ("quiz".equals(game.getType())) {
             FragmentWaiting waitingFragment = new FragmentWaiting();
             Bundle args = new Bundle();
-            args.putString("event_id", game.getEventId());
-            args.putString("game_id", game.getGameId());
+            args.putSerializable("game", game);
+            args.putLong("start_time", startTimeMillis); // Gửi start time dưới dạng long
             waitingFragment.setArguments(args);
 
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.fragment_container, waitingFragment)
-                    .addToBackStack(null)
+                    .addToBackStack("FragmentWaiting")
                     .commit();
-        }
-        else if (game.getType() == "shake"){
+        } else if ("shake".equals(game.getType())) {
             FragmentShakeGame shakeGameFragment = new FragmentShakeGame();
-
-
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, shakeGameFragment)
+                    .commit();
         }
     }
 }

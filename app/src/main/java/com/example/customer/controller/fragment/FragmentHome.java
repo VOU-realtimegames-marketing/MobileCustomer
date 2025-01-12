@@ -74,7 +74,7 @@ public class FragmentHome extends Fragment {
                 requireActivity().getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.fragment_container, detailFragment)
-                        .addToBackStack(null)
+                        .addToBackStack("FragmentEventDetail")
                         .commit();
             }
         });

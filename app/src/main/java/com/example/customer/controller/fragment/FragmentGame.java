@@ -48,26 +48,17 @@ public class FragmentGame extends Fragment {
             Game clickedGame = adapter.getItem(position);
 
             if (clickedGame != null) {
-                boolean isAboutoStartGame = false;
-                for (Game g : about_to_start_games) {
-                    if (g.getGameId().equals(clickedGame.getGameId())) {
-                        isAboutoStartGame = true;
-                        break;
-                    }
-                }
-
 
                 FragmentGameDetail detailFragment = new FragmentGameDetail();
                 Bundle args = new Bundle();
                 args.putSerializable("game", clickedGame);
-                args.putBoolean("isAboutoStartGame", isAboutoStartGame);
                 detailFragment.setArguments(args);
 
 
                 requireActivity().getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.fragment_container, detailFragment)
-                        .addToBackStack(null)
+                        .addToBackStack("FragmentGameDetail")
                         .commit();
             }
         });

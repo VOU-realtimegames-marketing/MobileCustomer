@@ -37,9 +37,7 @@ public class FragmentEnd extends Fragment {
 
         // Thêm sự kiện cho nút thoát
         exitButton.setOnClickListener(v -> {
-            if (getActivity() != null) {
-                getActivity().finish();
-            }
+            requireActivity().getSupportFragmentManager().popBackStack("FragmentGameDetail", 0);
         });
 
         return view;

@@ -15,27 +15,28 @@ import android.widget.TextView;
 
 import com.example.customer.R;
 import com.example.customer.data.Event;
+import com.example.customer.data.Game;
 import com.example.customer.data.Question;
 
 
 public class FragmentQuizGame extends Fragment {
     private TextView questionText, timerText, resultText;
     private Button option1, option2, option3, option4;
-    private String event_id;
-    private String game_id;
+    private Game game;
     private int correctAnswers = 0;
-    private int questionNumber = 10;
+    private int questionNumber = 1;
     private int currentQuestionIndex = 0;
     private Question question;
     private CountDownTimer questionTimer, resultTimer;
+    private boolean isAnswerSelected = false;
+    private boolean isCorrect = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            event_id = getArguments().getString("event_id");
-            game_id = getArguments().getString("game_id");
+            game = (Game) getArguments().getSerializable("game");
         }
     }
 
@@ -44,14 +45,7 @@ public class FragmentQuizGame extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_quiz_game, container, false);
 
-        initViews(view);
-        loadQuestion();
-        showQuestion();
 
-        return view;
-    }
-
-    private void initViews(View view) {
         questionText = view.findViewById(R.id.questionText);
         timerText = view.findViewById(R.id.timerText);
         resultText = view.findViewById(R.id.resultText);
@@ -65,16 +59,21 @@ public class FragmentQuizGame extends Fragment {
         option2.setOnClickListener(optionClickListener);
         option3.setOnClickListener(optionClickListener);
         option4.setOnClickListener(optionClickListener);
+
+        loadQuestion();
+        showQuestion();
+
+        return view;
     }
 
     private void loadQuestion() {
-        question = new Question(event_id, game_id, questionNumber, currentQuestionIndex,"What is the capital of France?", "Paris", "London", "Rome", "Berlin");
+        question = new Question(game.getEventId(), game.getGameId(), questionNumber, currentQuestionIndex,"What is the capital of France?", "Paris", "London", "Rome", "Berlin");
 
     }
 
     private void showQuestion() {
         if (currentQuestionIndex >= question.getNumber()) {
-            // Kết thúc quiz
+
             FragmentEnd endFragment = new FragmentEnd();
             Bundle bundle = new Bundle();
             bundle.putInt("correctAnswers", correctAnswers);
@@ -85,10 +84,12 @@ public class FragmentQuizGame extends Fragment {
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.fragment_container, endFragment)
-                    .addToBackStack(null)
+                    .addToBackStack("FragmentEnd")
                     .commit();
             return;
         }
+        isAnswerSelected = false;
+        isCorrect = false;
 
 
         questionText.setText(question.getQuestion());
@@ -106,19 +107,23 @@ public class FragmentQuizGame extends Fragment {
 
             @Override
             public void onFinish() {
-                showResult(false);
+                if (!isAnswerSelected) {
+                    showResult(false);
+                } else {
+                    showResult(isCorrect);
+                }
             }
         };
         questionTimer.start();
     }
 
     private void checkAnswer(Button selectedOption) {
-        questionTimer.cancel();
-        boolean isCorrect = selectedOption.getText().toString().equals(question.getAnswer());
+        if (isAnswerSelected) return;
+        isAnswerSelected = true;
+        isCorrect = selectedOption.getText().toString().equals(question.getAnswer());
         if (isCorrect) {
             correctAnswers++;
         }
-        showResult(isCorrect);
     }
 
     private void showResult(boolean isCorrect) {
