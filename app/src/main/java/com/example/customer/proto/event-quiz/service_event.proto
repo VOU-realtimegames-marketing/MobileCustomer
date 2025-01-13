@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package vou.proto;
+
+import "event-quiz/rpc_create_event.proto";
+import "event-quiz/rpc_get_all_events.proto";
+import "event-quiz/rpc_get_events_of_owner.proto";
+import "event-quiz/rpc_get_event_by_id.proto";
+import "event-quiz/rpc_update_event_status.proto";
+import "event-quiz/rpc_get_quizzes_by_event_id.proto";
+
+option go_package = "VOU-Server/proto/gen";
+
+service EventService {
+  rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse) {}
+  rpc GetAllEventsOfOwner(GetEventsOfOwnerRequest) returns (GetEventsOfOwnerResponse) {}
+  rpc GetAllEvents(GetAllEventsRequest) returns (GetAllEventsResponse) {}
+  rpc GetEventById(GetEventByIdRequest) returns (GetEventByIdResponse) {}
+  rpc UpdateEventStatus(UpdateEventStatusRequest) returns (UpdateEventStatusResponse) {}
+
+  rpc GetQuizzesByEventId(GetQuizzesByEventIdRequest) returns (GetQuizzesByEventIdResponse) {}
+}

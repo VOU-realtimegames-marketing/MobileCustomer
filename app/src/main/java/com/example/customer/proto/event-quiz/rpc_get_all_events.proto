@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package vou.proto;
+
+import "event-quiz/event.proto";
+
+option go_package = "VOU-Server/proto/gen";
+
+message GetAllEventsRequest {}
+
+message GetAllEventsResponse {
+  repeated Event events = 1;
+}

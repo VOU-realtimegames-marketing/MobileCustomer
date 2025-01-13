@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package vou.proto;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "VOU-Server/proto/gen";
+
+message Quiz {
+  int64 id = 1;
+  int64 event_id = 2;
+  string quiz_genre = 3;
+  google.protobuf.ListValue content = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+

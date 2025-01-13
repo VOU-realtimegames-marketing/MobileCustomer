@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package vou.proto;
+
+import "event-quiz/event.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "VOU-Server/proto/gen";
+
+message CreateEventRequest {
+  string name = 1;
+  int32 voucher_quantity = 2;
+  string owner = 3;
+  int64 game_id = 4;
+  int64 store_id = 5;
+  google.protobuf.Timestamp start_time = 6;
+  google.protobuf.Timestamp end_time = 7;
+  optional string quiz_genre = 8;
+  optional int32 quiz_number = 9;
+}
+
+message CreateEventResponse {
+  Event event = 1;
+}

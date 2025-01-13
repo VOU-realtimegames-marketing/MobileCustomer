@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package vou.proto;
+
+import "event-quiz/event.proto";
+
+option go_package = "VOU-Server/proto/gen";
+
+message GetEventByIdRequest {
+  int64 id = 1;
+}
+
+message GetEventByIdResponse {
+  Event event = 1;
+}

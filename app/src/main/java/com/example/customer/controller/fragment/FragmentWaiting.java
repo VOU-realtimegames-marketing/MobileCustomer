@@ -18,7 +18,6 @@ import com.example.customer.data.Game;
 public class FragmentWaiting extends Fragment {
     private TextView countdownText;
     private long quizStartTime = 0;
-
     private CountDownTimer countDownTimer;
 
 

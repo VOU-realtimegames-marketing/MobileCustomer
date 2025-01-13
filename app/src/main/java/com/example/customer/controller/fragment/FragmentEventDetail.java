@@ -47,8 +47,7 @@ public class FragmentEventDetail extends Fragment {
         if (event != null) {
             eventImage.setImageResource(event.getEventImage());
             eventName.setText(event.getEventName());
-            eventGames.setText(String.join(", ", event.getGamesId()));
-            eventVoucherQuantity.setText("Voucher " + String.valueOf(event.getVoucherQuantity()) + "%");
+            eventVoucherQuantity.setText("Voucher: " + String.valueOf(event.getVoucherQuantity()) + "%");
 
 
             eventStartTime.setText("Start: " + event.getStartTime());
@@ -60,7 +59,7 @@ public class FragmentEventDetail extends Fragment {
         } else {
             wishlistButton.setVisibility(View.VISIBLE);
             wishlistButton.setOnClickListener(v -> {
-
+                isInWishlist = true;
                 addToWishlist(event);
                 wishlistButton.setVisibility(View.GONE);
             });
@@ -70,6 +69,16 @@ public class FragmentEventDetail extends Fragment {
     }
 
     private void addToWishlist(Event event) {
-        // Gọi gRPC  addUserWishlist
+        FragmentHome homeFragment = new FragmentHome();
+        Bundle args = new Bundle();
+        args.putSerializable("event", event);
+        args.putBoolean("isInWishlist", isInWishlist);
+        homeFragment.setArguments(args);
+
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, homeFragment)
+                .addToBackStack("FragmentHome")
+                .commit();
     }
 }

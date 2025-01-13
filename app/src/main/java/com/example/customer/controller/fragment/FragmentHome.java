@@ -1,18 +1,16 @@
 package com.example.customer.controller.fragment;
 
-import android.app.Activity;
+
 import android.content.Context;
-import android.database.DataSetObserver;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -20,23 +18,40 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.customer.Config.Config;
 import com.example.customer.R;
 import com.example.customer.data.Event;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import vou.proto.EventServiceGrpc;
+import vou.proto.RpcGetAllEvents;
 
 
 public class FragmentHome extends Fragment {
 
-    Event event1 = new Event("event1", new String[]{"Game1", "Game2"}, "Event 1", R.drawable.ic_launcher_foreground, 20f, null, null);
-    Event event2 = new Event("event2", new String[]{"Game1", "Game2"}, "Event 2", R.drawable.ic_launcher_foreground, 30f, null, null);
-    Event event3 = new Event("event3", new String[]{"Game1", "Game2"}, "Event 3", R.drawable.ic_launcher_foreground, 10f, null, null);
-    Event event4 = new Event("event4", new String[]{"Game1", "Game2"}, "Event 4", R.drawable.ic_launcher_foreground, 20f, null, null);
-    Event event5 = new Event("event5", new String[]{"Game1", "Game2"}, "Event 5", R.drawable.ic_launcher_foreground, 40f, null, null);
+    private List<Event> wishlist_events = new ArrayList<>();
+    private List<Event> upcoming_events = new ArrayList<>();
 
-    Event[] wishlist_events = {event1, event2, event3};
-    Event[] upcoming_events = {event4, event5};
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            Event event = (Event) getArguments().getSerializable("event");
+            boolean isInWishlist = getArguments().getBoolean("isInWishlist", false);
+            if (isInWishlist) {
+                wishlist_events.add(event);
+            }
+        }
+
+        GetAllEvents getAllEvents = new GetAllEvents();
+        getAllEvents.execute();
+    }
 
     @Nullable
     @Override
@@ -57,7 +72,7 @@ public class FragmentHome extends Fragment {
             if (clickedEvent != null) {
                 boolean isInWishlist = false;
                 for (Event e : wishlist_events) {
-                    if (e.getEventId().equals(clickedEvent.getEventId())) {
+                    if (e.getEventId() == clickedEvent.getEventId()) {
                         isInWishlist = true;
                         break;
                     }
@@ -83,13 +98,13 @@ public class FragmentHome extends Fragment {
 
         btnWishlist.setOnClickListener(v -> {
             adapter.clear();
-            adapter.addAll(List.of(wishlist_events));
+            adapter.addAll(wishlist_events);
             adapter.notifyDataSetChanged();
         });
 
         btnUpcoming.setOnClickListener(v -> {
             adapter.clear();
-            adapter.addAll(List.of(upcoming_events));
+            adapter.addAll(upcoming_events);
             adapter.notifyDataSetChanged();
         });
 
@@ -97,6 +112,77 @@ public class FragmentHome extends Fragment {
         btnWishlist.performClick();
 
         return view;
+    }
+
+    private class GetAllEvents extends AsyncTask<Void, Void, RpcGetAllEvents.GetAllEventsResponse> {
+        @Override
+        protected RpcGetAllEvents.GetAllEventsResponse doInBackground(Void... voids) {
+            ManagedChannel channel = null;
+            try {
+                channel = ManagedChannelBuilder.forAddress(Config.ip,Config.event_port)
+                        .usePlaintext()
+                        .build();
+
+                EventServiceGrpc.EventServiceBlockingStub stub = EventServiceGrpc.newBlockingStub(channel);
+                RpcGetAllEvents.GetAllEventsRequest request = RpcGetAllEvents.GetAllEventsRequest.newBuilder()
+                        .build();
+                RpcGetAllEvents.GetAllEventsResponse response = stub.getAllEvents(request);
+                return response;
+
+            }
+            catch (Exception e){
+                Log.e("Error in Get All Event async task:",e.getMessage());
+            }
+            finally {
+                if (channel != null) {
+                    channel.shutdown();
+                }
+            }
+            return null;
+        }
+        @Override
+        protected void onPostExecute(RpcGetAllEvents.GetAllEventsResponse response) {
+            super.onPostExecute(response);
+
+            if (response != null) {
+                // Parse the response
+                List<Event> convertedEvents = new ArrayList<>();
+                for (vou.proto.EventOuterClass.Event grpcEvent : response.getEventsList()) {
+                    Event event = new Event(
+                            grpcEvent.getId(),
+                            grpcEvent.getGameId(),
+                            grpcEvent.getStoreId(),
+                            grpcEvent.getName(),
+                            R.drawable.ic_launcher_foreground,
+                            grpcEvent.getVoucherQuantity(),
+                            convertToLocalDateTime(grpcEvent.getStartTime().getSeconds()),
+                            convertToLocalDateTime(grpcEvent.getEndTime().getSeconds()),
+                            grpcEvent.getGameType(),
+                            grpcEvent.getStore()
+                    );
+                    convertedEvents.add(event);
+                }
+
+                // Update upcoming_events list
+                upcoming_events.clear();
+                upcoming_events.addAll(convertedEvents);
+
+                // Optionally refresh the UI
+                FragmentHome.this.getActivity().runOnUiThread(() -> {
+                    Button btnUpcoming = getView().findViewById(R.id.btn_upcoming);
+                    if (btnUpcoming != null) {
+                        btnUpcoming.performClick(); // Refresh the displayed events
+                    }
+                });
+            }
+        }
+
+        // Utility method to convert seconds to LocalDateTime
+        private LocalDateTime convertToLocalDateTime(long seconds) {
+            return LocalDateTime.ofEpochSecond(seconds, 0, ZoneOffset.UTC);
+        }
+
+
     }
 }
 

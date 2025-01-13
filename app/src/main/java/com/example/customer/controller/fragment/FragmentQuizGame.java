@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.os.CountDownTimer;
+import android.speech.tts.TextToSpeech;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,8 @@ import com.example.customer.R;
 import com.example.customer.data.Event;
 import com.example.customer.data.Game;
 import com.example.customer.data.Question;
+
+import java.util.Locale;
 
 
 public class FragmentQuizGame extends Fragment {
@@ -30,8 +33,8 @@ public class FragmentQuizGame extends Fragment {
     private CountDownTimer questionTimer, resultTimer;
     private boolean isAnswerSelected = false;
     private boolean isCorrect = false;
-
-    private Button selectedOption;
+    private Button selectedOption = null;
+    private TextToSpeech textToSpeech;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -40,6 +43,12 @@ public class FragmentQuizGame extends Fragment {
         if (getArguments() != null) {
             game = (Game) getArguments().getSerializable("game");
         }
+
+        textToSpeech = new TextToSpeech(requireContext(), status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                textToSpeech.setLanguage(Locale.ENGLISH);
+            }
+        });
     }
 
     @Nullable
@@ -102,7 +111,15 @@ public class FragmentQuizGame extends Fragment {
         option4.setText(question.getOption4());
         resultText.setVisibility(View.GONE);
 
-        questionTimer = new CountDownTimer(10000, 1000) {
+        String questionAndOptions = question.getQuestion() + ". Option 1: " + question.getOption1() +
+                ". Option 2: " + question.getOption2() + ". Option 3: " + question.getOption3() +
+                ". Option 4: " + question.getOption4();
+
+        if (textToSpeech != null) {
+            textToSpeech.speak(questionAndOptions, TextToSpeech.QUEUE_FLUSH, null, null);
+        }
+
+        questionTimer = new CountDownTimer(15000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 timerText.setText("Time: " + millisUntilFinished / 1000);
@@ -135,7 +152,9 @@ public class FragmentQuizGame extends Fragment {
         resultText.setVisibility(View.VISIBLE);
         resultText.setText(isCorrect ? "Correct!" : "Wrong!");
 
-        selectedOption.setBackgroundResource(R.drawable.option_background_wrong);
+        if (selectedOption != null) {
+            selectedOption.setBackgroundResource(R.drawable.option_background_wrong);
+        }
 
         if (option1.getText().toString().equals(question.getAnswer())) {
             option1.setBackgroundResource(R.drawable.option_background_correct);
@@ -150,8 +169,10 @@ public class FragmentQuizGame extends Fragment {
             option4.setBackgroundResource(R.drawable.option_background_correct);
         }
 
-
-
+        String correctOptions = "The correct answer is " + question.getAnswer();
+        if (textToSpeech != null) {
+            textToSpeech.speak(correctOptions, TextToSpeech.QUEUE_FLUSH, null, null);
+        }
 
         resultTimer = new CountDownTimer(5000, 1000) {
             @Override
@@ -160,6 +181,7 @@ public class FragmentQuizGame extends Fragment {
             @Override
             public void onFinish() {
                 currentQuestionIndex++;
+                selectedOption = null;
                 resetOptionColor();
                 showQuestion();
             }
@@ -177,6 +199,10 @@ public class FragmentQuizGame extends Fragment {
     public void onDestroy() {
         if (questionTimer != null) questionTimer.cancel();
         if (resultTimer != null) resultTimer.cancel();
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+        }
         super.onDestroy();
     }
 }
