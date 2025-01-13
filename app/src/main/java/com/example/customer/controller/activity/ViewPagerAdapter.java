@@ -7,7 +7,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.example.customer.controller.fragment.FragmentGame;
 import com.example.customer.controller.fragment.FragmentHome;
-import com.example.customer.controller.fragment.FragmentLocation;
+import com.example.customer.controller.fragment.FragmentFriend;
 import com.example.customer.controller.fragment.FragmentProfile;
 import com.example.customer.controller.fragment.FragmentVoucher;
 
@@ -23,7 +23,7 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
             case 0:return new FragmentHome();
             case 1:return new FragmentVoucher();
             case 2:return new FragmentGame();
-            case 3:return new FragmentLocation();
+            case 3:return new FragmentFriend();
             case 4:return new FragmentProfile();
             default:return new FragmentHome();
         }

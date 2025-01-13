@@ -119,7 +119,7 @@ public class FragmentQuizGame extends Fragment {
             textToSpeech.speak(questionAndOptions, TextToSpeech.QUEUE_FLUSH, null, null);
         }
 
-        questionTimer = new CountDownTimer(15000, 1000) {
+        questionTimer = new CountDownTimer(10000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 timerText.setText("Time: " + millisUntilFinished / 1000);

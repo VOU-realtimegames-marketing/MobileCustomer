@@ -104,11 +104,11 @@ class GameAdapter extends ArrayAdapter<Game> {
         Game game = games.get(position);
 
         ImageView imageView = convertView.findViewById(R.id.game_image);
-        TextView textView = convertView.findViewById(R.id.game_name);
+        TextView name = convertView.findViewById(R.id.game_name);
         TextView startTime = convertView.findViewById(R.id.start_time);
 
         imageView.setImageResource(game.getGameImage());
-        textView.setText(game.getGameName());
+        name.setText(game.getGameName());
         startTime.setText("");
 
         return convertView;

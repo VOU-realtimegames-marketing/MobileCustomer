@@ -48,8 +48,6 @@ public class FragmentEventDetail extends Fragment {
             eventImage.setImageResource(event.getEventImage());
             eventName.setText(event.getEventName());
             eventVoucherQuantity.setText("Voucher: " + String.valueOf(event.getVoucherQuantity()) + "%");
-
-
             eventStartTime.setText("Start: " + event.getStartTime());
             eventEndTime.setText("End: " + event.getEndTime());
         }

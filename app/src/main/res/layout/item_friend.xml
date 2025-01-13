@@ -6,7 +6,7 @@
     android:padding="8dp">
 
     <ImageView
-        android:id="@+id/event_image"
+        android:id="@+id/friend_image"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginEnd="16dp"
@@ -14,8 +14,8 @@
     </ImageView>
 
     <TextView
-        android:id="@+id/event_name"
-        android:layout_width="200dp"
+        android:id="@+id/friend_name"
+        android:layout_width="180dp"
         android:layout_height="50dp"
         android:textSize="16sp"
         android:textColor="@android:color/black"
@@ -23,10 +23,11 @@
         android:gravity="center_vertical">
     </TextView>
     <TextView
-        android:id="@+id/voucher_quantity"
-        android:layout_width="100dp"
+        android:id="@+id/status"
+        android:layout_width="120dp"
         android:layout_height="50dp"
         android:textSize="16sp"
+        android:paddingRight="10dp"
         android:fontFamily="@font/timesnewroman"
         android:textColor="@android:color/black">
     </TextView>

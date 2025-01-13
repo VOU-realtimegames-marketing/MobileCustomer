@@ -145,7 +145,6 @@ public class FragmentHome extends Fragment {
             super.onPostExecute(response);
 
             if (response != null) {
-                // Parse the response
                 List<Event> convertedEvents = new ArrayList<>();
                 for (vou.proto.EventOuterClass.Event grpcEvent : response.getEventsList()) {
                     Event event = new Event(
@@ -163,21 +162,20 @@ public class FragmentHome extends Fragment {
                     convertedEvents.add(event);
                 }
 
-                // Update upcoming_events list
+
                 upcoming_events.clear();
                 upcoming_events.addAll(convertedEvents);
 
-                // Optionally refresh the UI
+
                 FragmentHome.this.getActivity().runOnUiThread(() -> {
                     Button btnUpcoming = getView().findViewById(R.id.btn_upcoming);
                     if (btnUpcoming != null) {
-                        btnUpcoming.performClick(); // Refresh the displayed events
+                        btnUpcoming.performClick();
                     }
                 });
             }
         }
 
-        // Utility method to convert seconds to LocalDateTime
         private LocalDateTime convertToLocalDateTime(long seconds) {
             return LocalDateTime.ofEpochSecond(seconds, 0, ZoneOffset.UTC);
         }
@@ -206,12 +204,12 @@ class EventAdapter extends ArrayAdapter<Event> {
         Event event = events.get(position);
 
         ImageView imageView = convertView.findViewById(R.id.event_image);
-        TextView textView = convertView.findViewById(R.id.event_name);
+        TextView name = convertView.findViewById(R.id.event_name);
         TextView voucherQuantity = convertView.findViewById(R.id.voucher_quantity);
 
         imageView.setImageResource(event.getEventImage());
-        textView.setText(event.getEventName());
-        voucherQuantity.setText(" - " + String.valueOf(event.getVoucherQuantity()) + " %");
+        name.setText(event.getEventName());
+        voucherQuantity.setText("Quantity: " + String.valueOf(event.getVoucherQuantity()));
 
         return convertView;
     }

@@ -69,12 +69,12 @@ class VoucherAdapter extends ArrayAdapter<Voucher> {
 
         Voucher voucher = vouchers.get(position);
 
-        TextView textView = convertView.findViewById(R.id.event_name);
+        TextView name = convertView.findViewById(R.id.event_name);
         TextView expiresAt = convertView.findViewById(R.id.expires_at);
         TextView voucherQuantity = convertView.findViewById(R.id.voucher_quantity);
 
 
-        textView.setText(voucher.getEventName());
+        name.setText(voucher.getEventName());
         expiresAt.setText("Expires at: " + voucher.getExpiresAt());
         voucherQuantity.setText(" - " + String.valueOf(voucher.getVoucherQuantity()) + " %");
 
