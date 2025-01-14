@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package vou.proto;
+
+option go_package = "VOU-Server/proto/gen";
+
+message GetQuestionRequest {
+  int32 question_num = 1;
+  int64 event_id = 2;
+}
+
+message GetQuestionResponse {
+  string question = 1;
+  repeated string options = 2;
+}

@@ -12,10 +12,11 @@ message Event {
   int32 voucher_quantity = 3;
   int64 game_id = 4;
   int64 store_id = 5;
-  optional string game_type = 9;
-  optional string store = 10;
-  string status = 6;
-  google.protobuf.Timestamp start_time = 7;
-  google.protobuf.Timestamp end_time = 8;
+  optional string game_type = 6;
+  optional string store = 7;
+  optional int32 quiz_num = 8;
+  string status = 9;
+  google.protobuf.Timestamp start_time = 10;
+  google.protobuf.Timestamp end_time = 11;
 }
 

@@ -1,7 +1,9 @@
 package com.example.customer.controller.fragment;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,21 +17,38 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.customer.Config.Config;
 import com.example.customer.R;
+import com.example.customer.data.Event;
 import com.example.customer.data.Game;
+import com.example.customer.utils.AuthInterceptor;
+import com.example.customer.utils.Utils;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FragmentGame extends Fragment {
-    Game game1 = new Game(1, 1, "quiz", "GameQuiz1", R.drawable.ic_launcher_foreground, null, null);
-    Game game2 = new Game(1, 2, "shake", "GameShake1", R.drawable.ic_launcher_foreground, null, null);
-    Game game3 = new Game(2, 3, "quiz", "GameQuiz2", R.drawable.ic_launcher_foreground, null, null);
-    Game game4 = new Game(3, 4, "shake", "GameShake2", R.drawable.ic_launcher_foreground, null, null);
-    Game game5 = new Game(3, 5, "quiz", "GameQuiz3", R.drawable.ic_launcher_foreground, null, null);
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import vou.proto.GatewayGrpc;
+import vou.proto.RpcGetAllEvents;
 
-    Game[] about_to_start_games = {game1, game2, game3};
-    Game[] upcoming_games = {game4, game5};
+public class FragmentGame extends Fragment {
+
+
+    private List<Game> about_to_start_games = new ArrayList<>();
+    private List<Game> upcoming_games = new ArrayList<>();
+
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        String accessToken = Utils.getAccessToken(requireActivity());
+        GetAllEvents getAllEvents = new GetAllEvents(accessToken);
+        getAllEvents.execute();
+    }
 
     @Nullable
     @Override
@@ -67,13 +86,13 @@ public class FragmentGame extends Fragment {
 
         btnAbouttoStartGame.setOnClickListener(v -> {
             adapter.clear();
-            adapter.addAll(List.of(about_to_start_games));
+            adapter.addAll(about_to_start_games);
             adapter.notifyDataSetChanged();
         });
 
         btnUpcominggame.setOnClickListener(v -> {
             adapter.clear();
-            adapter.addAll(List.of(upcoming_games));
+            adapter.addAll(upcoming_games);
             adapter.notifyDataSetChanged();
         });
 
@@ -81,6 +100,89 @@ public class FragmentGame extends Fragment {
         btnAbouttoStartGame.performClick();
 
         return view;
+    }
+
+    private class GetAllEvents extends AsyncTask<Void, Void, RpcGetAllEvents.GetAllEventsResponse> {
+        private String accessToken;
+
+        public GetAllEvents(String accessToken) {
+            this.accessToken = accessToken;
+        }
+
+        @Override
+        protected RpcGetAllEvents.GetAllEventsResponse doInBackground(Void... voids) {
+            ManagedChannel channel = null;
+            try {
+                channel = ManagedChannelBuilder.forAddress(Config.ip, Config.port)
+                        .usePlaintext()
+                        .intercept(new AuthInterceptor(accessToken))
+                        .build();
+
+                GatewayGrpc.GatewayBlockingStub blockingStub = GatewayGrpc.newBlockingStub(channel);
+                RpcGetAllEvents.GetAllEventsRequest request = RpcGetAllEvents.GetAllEventsRequest.newBuilder()
+                        .build();
+                RpcGetAllEvents.GetAllEventsResponse response = blockingStub.getAllEvents(request);
+                return response;
+
+            } catch (Exception e) {
+                Log.e("Error in GetAllGames:", e.getMessage());
+            } finally {
+                if (channel != null) {
+                    channel.shutdown();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(RpcGetAllEvents.GetAllEventsResponse response) {
+            super.onPostExecute(response);
+
+            if (response != null) {
+                List<Game> convertedGames = new ArrayList<>();
+                for (vou.proto.EventOuterClass.Event grpcEvent : response.getEventsList()) {
+                    Event event = new Event(
+                            grpcEvent.getId(),
+                            grpcEvent.getGameId(),
+                            grpcEvent.getStoreId(),
+                            grpcEvent.getName(),
+                            R.drawable.ic_launcher_foreground,
+                            grpcEvent.getVoucherQuantity(),
+                            convertToLocalDateTime(grpcEvent.getStartTime().getSeconds()),
+                            convertToLocalDateTime(grpcEvent.getEndTime().getSeconds()),
+                            grpcEvent.getGameType(),
+                            grpcEvent.getStore(),
+                            grpcEvent.getQuizNum()
+                    );
+                    Game game = new Game(
+                            event.getEventId(),
+                            event.getGamesId(),
+                            event.getEventName(),
+                            R.drawable.ic_launcher_foreground,
+                            event.getStartTime(),
+                            event.getEndTime(),
+                            event.getQuizNum()
+                    );
+                    convertedGames.add(game);
+                }
+
+                about_to_start_games.clear();
+                about_to_start_games.addAll(convertedGames);
+
+                FragmentGame.this.getActivity().runOnUiThread(() -> {
+                    Button btnAbouttoStartGame = getView().findViewById(R.id.btn_start_game);
+                    if (btnAbouttoStartGame != null) {
+                        btnAbouttoStartGame.performClick();
+                    }
+                });
+            }
+        }
+
+        private LocalDateTime convertToLocalDateTime(long seconds) {
+            return Instant.ofEpochSecond(seconds)
+                    .atZone(ZoneId.of("Asia/Ho_Chi_Minh"))
+                    .toLocalDateTime();
+        }
     }
 }
 

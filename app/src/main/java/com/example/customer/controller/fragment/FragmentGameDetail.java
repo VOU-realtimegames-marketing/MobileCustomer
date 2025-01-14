@@ -16,6 +16,9 @@ import androidx.fragment.app.Fragment;
 import com.example.customer.R;
 import com.example.customer.data.Game;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
 
 public class FragmentGameDetail extends Fragment {
 
@@ -32,8 +35,8 @@ public class FragmentGameDetail extends Fragment {
             game = (Game) getArguments().getSerializable("game");
 
 
-            startTimeMillis = calculateQuizStartTime();
-            endTimeMillis = calculateQuizEndTime();
+            startTimeMillis = calculateQuizStartTime(game.getStartTime());
+            endTimeMillis = calculateQuizEndTime(game.getEndTime());
         }
     }
 
@@ -52,14 +55,20 @@ public class FragmentGameDetail extends Fragment {
         if (game != null) {
             gameImage.setImageResource(game.getGameImage());
             gameName.setText(game.getGameName());
-            gameType.setText("Type: " + game.getType());
+            if (game.getGameId() == 1) {
+                gameType.setText("Type: Quiz");
+            }
+            else {
+                gameType.setText("Type: Shake");
+            }
+
             gameStartTime.setText("Start: " + game.getStartTime());
             gameEndTime.setText("End: " + game.getEndTime());
         }
 
 
         long currentTimeMillis = System.currentTimeMillis();
-        if (currentTimeMillis >= startTimeMillis && currentTimeMillis <= endTimeMillis) {
+        if (currentTimeMillis <= endTimeMillis) {
             joinGameButton.setVisibility(View.VISIBLE);
             joinGameButton.setOnClickListener(v -> joinGame(game));
         } else {
@@ -69,24 +78,16 @@ public class FragmentGameDetail extends Fragment {
         return view;
     }
 
-    private long calculateQuizStartTime() {
-        Calendar quizStartCalendar = Calendar.getInstance();
-        quizStartCalendar.set(Calendar.HOUR_OF_DAY, 1);
-        quizStartCalendar.set(Calendar.MINUTE, 35);
-        quizStartCalendar.set(Calendar.SECOND, 0);
-        return quizStartCalendar.getTimeInMillis();
+    private long calculateQuizStartTime(LocalDateTime startTime) {
+        return startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
-    private long calculateQuizEndTime() {
-        Calendar quizEndCalendar = Calendar.getInstance();
-        quizEndCalendar.set(Calendar.HOUR_OF_DAY, 23);
-        quizEndCalendar.set(Calendar.MINUTE, 37);
-        quizEndCalendar.set(Calendar.SECOND, 30);
-        return quizEndCalendar.getTimeInMillis();
+    private long calculateQuizEndTime(LocalDateTime endTime) {
+        return endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
     private void joinGame(Game game) {
-        if ("quiz".equals(game.getType())) {
+        if (game.getGameId() == 1) {
             FragmentWaiting waitingFragment = new FragmentWaiting();
             Bundle args = new Bundle();
             args.putSerializable("game", game);
@@ -98,7 +99,7 @@ public class FragmentGameDetail extends Fragment {
                     .replace(R.id.fragment_container, waitingFragment)
                     .addToBackStack("FragmentWaiting")
                     .commit();
-        } else if ("shake".equals(game.getType())) {
+        } else if (game.getGameId() == 2) {
             FragmentShakeGame shakeGameFragment = new FragmentShakeGame();
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()

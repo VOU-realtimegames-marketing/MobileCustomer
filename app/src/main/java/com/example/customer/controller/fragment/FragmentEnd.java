@@ -47,6 +47,7 @@ public class FragmentEnd extends Fragment {
     private int correctAnswers;
     private int totalQuestions;
     private long event_id;
+    private Boolean isWin;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,6 +56,7 @@ public class FragmentEnd extends Fragment {
             correctAnswers = getArguments().getInt("correctAnswers", 0);
             totalQuestions = getArguments().getInt("totalQuestions", 0);
             event_id = getArguments().getLong("event_id", 0);
+            isWin = getArguments().getBoolean("isWin", false);
         }
     }
 
@@ -71,7 +73,7 @@ public class FragmentEnd extends Fragment {
         resultText.setText(String.format("You answered %d out of %d questions correctly!", correctAnswers, totalQuestions));
 
 
-        if (correctAnswers == totalQuestions) {
+        if (isWin) {
             openReceiveVoucherDialog(true);
         } else {
             openReceiveVoucherDialog(false);

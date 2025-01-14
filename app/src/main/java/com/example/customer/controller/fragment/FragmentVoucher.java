@@ -24,7 +24,9 @@ import com.example.customer.data.Voucher;
 import com.example.customer.utils.AuthInterceptor;
 import com.example.customer.utils.Utils;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
@@ -136,7 +138,9 @@ public class FragmentVoucher extends Fragment {
         }
 
         private LocalDateTime convertToLocalDateTime(long seconds) {
-            return LocalDateTime.ofEpochSecond(seconds, 0, ZoneOffset.UTC);
+            return Instant.ofEpochSecond(seconds)
+                    .atZone(ZoneId.of("Asia/Ho_Chi_Minh"))
+                    .toLocalDateTime();
         }
 
 

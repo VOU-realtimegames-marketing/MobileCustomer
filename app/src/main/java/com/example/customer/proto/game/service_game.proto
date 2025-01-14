@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package vou.proto;
+
+import "game/rpc_answer_question.proto";
+import "game/rpc_get_question.proto";
+
+option go_package = "VOU-Server/proto/gen";
+
+service GameService {
+  rpc AnswerQuestion(stream AnswerQuestionRequest) returns (stream AnswerQuestionResponse) {}
+  rpc GetQuestion(stream GetQuestionRequest) returns (stream GetQuestionResponse) {}
+}

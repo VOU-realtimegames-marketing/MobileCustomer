@@ -17,8 +17,9 @@ public class Event implements Serializable {
     private LocalDateTime end_time;
     private String game_type;
     private String store_name;
+    private int quiz_num;
 
-    public Event(long event_id, long games_id, long store_id, String event_name, int event_image, int voucher_quantity, LocalDateTime start_time, LocalDateTime end_time, String game_type, String store_name){
+    public Event(long event_id, long games_id, long store_id, String event_name, int event_image, int voucher_quantity, LocalDateTime start_time, LocalDateTime end_time, String game_type, String store_name, int quiz_num){
         this.event_id = event_id;
         this.games_id = games_id;
         this.store_id = store_id;
@@ -29,6 +30,7 @@ public class Event implements Serializable {
         this.end_time = end_time;
         this.game_type = game_type;
         this.store_name = store_name;
+        this.quiz_num = quiz_num;
     }
     public long getEventId(){
         return event_id;
@@ -59,5 +61,8 @@ public class Event implements Serializable {
     }
     public String getStoreName() {
         return store_name;
+    }
+    public int getQuizNum() {
+        return quiz_num;
     }
 }

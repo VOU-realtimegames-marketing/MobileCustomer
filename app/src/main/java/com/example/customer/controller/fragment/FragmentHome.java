@@ -24,7 +24,9 @@ import com.example.customer.data.Event;
 import com.example.customer.utils.AuthInterceptor;
 import com.example.customer.utils.Utils;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
@@ -175,7 +177,8 @@ public class FragmentHome extends Fragment {
                             convertToLocalDateTime(grpcEvent.getStartTime().getSeconds()),
                             convertToLocalDateTime(grpcEvent.getEndTime().getSeconds()),
                             grpcEvent.getGameType(),
-                            grpcEvent.getStore()
+                            grpcEvent.getStore(),
+                            grpcEvent.getQuizNum()
                     );
                     convertedEvents.add(event);
                 }
@@ -193,7 +196,9 @@ public class FragmentHome extends Fragment {
         }
 
         private LocalDateTime convertToLocalDateTime(long seconds) {
-            return LocalDateTime.ofEpochSecond(seconds, 0, ZoneOffset.UTC);
+            return Instant.ofEpochSecond(seconds)
+                    .atZone(ZoneId.of("Asia/Ho_Chi_Minh"))
+                    .toLocalDateTime();
         }
     }
 }
