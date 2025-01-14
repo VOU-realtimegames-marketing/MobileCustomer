@@ -22,11 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FragmentGame extends Fragment {
-    Game game1 = new Game("event1", "game1", "quiz", "GameQuiz1", R.drawable.ic_launcher_foreground, null, null);
-    Game game2 = new Game("event1", "game2", "shake", "GameShake1", R.drawable.ic_launcher_foreground, null, null);
-    Game game3 = new Game("event2", "game3", "quiz", "GameQuiz2", R.drawable.ic_launcher_foreground, null, null);
-    Game game4 = new Game("event3", "game4", "shake", "GameShake2", R.drawable.ic_launcher_foreground, null, null);
-    Game game5 = new Game("event3", "game5", "quiz", "GameQuiz3", R.drawable.ic_launcher_foreground, null, null);
+    Game game1 = new Game(1, 1, "quiz", "GameQuiz1", R.drawable.ic_launcher_foreground, null, null);
+    Game game2 = new Game(1, 2, "shake", "GameShake1", R.drawable.ic_launcher_foreground, null, null);
+    Game game3 = new Game(2, 3, "quiz", "GameQuiz2", R.drawable.ic_launcher_foreground, null, null);
+    Game game4 = new Game(3, 4, "shake", "GameShake2", R.drawable.ic_launcher_foreground, null, null);
+    Game game5 = new Game(3, 5, "quiz", "GameQuiz3", R.drawable.ic_launcher_foreground, null, null);
 
     Game[] about_to_start_games = {game1, game2, game3};
     Game[] upcoming_games = {game4, game5};

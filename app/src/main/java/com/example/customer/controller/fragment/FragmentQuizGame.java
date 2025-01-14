@@ -90,6 +90,7 @@ public class FragmentQuizGame extends Fragment {
             Bundle bundle = new Bundle();
             bundle.putInt("correctAnswers", correctAnswers);
             bundle.putInt("totalQuestions", questionNumber);
+            bundle.putLong("event_id", game.getEventId());
             endFragment.setArguments(bundle);
 
 

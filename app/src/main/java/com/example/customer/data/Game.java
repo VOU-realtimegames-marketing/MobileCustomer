@@ -4,15 +4,15 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 public class Game implements Serializable {
-    private String event_id;
-    private String game_id;
+    private long event_id;
+    private long game_id;
     private String game_name;
     private String type;
     private int game_image;
     private LocalDateTime start_time;
     private LocalDateTime end_time;
 
-    public Game(String event_id, String game_id, String type, String game_name, int game_image, LocalDateTime start_time, LocalDateTime end_time) {
+    public Game(long event_id, long game_id, String type, String game_name, int game_image, LocalDateTime start_time, LocalDateTime end_time) {
         this.event_id = event_id;
         this.game_id = game_id;
         this.type = type;
@@ -23,11 +23,11 @@ public class Game implements Serializable {
 
     }
 
-    public String getEventId() {
+    public long getEventId() {
         return event_id;
     }
 
-    public String getGameId() {
+    public long getGameId() {
         return game_id;
     }
 

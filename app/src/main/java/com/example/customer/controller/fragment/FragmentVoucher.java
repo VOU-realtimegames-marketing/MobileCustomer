@@ -21,6 +21,7 @@ import com.example.customer.R;
 import com.example.customer.data.Event;
 import com.example.customer.data.Game;
 import com.example.customer.data.Voucher;
+import com.example.customer.utils.AuthInterceptor;
 import com.example.customer.utils.Utils;
 
 import java.time.LocalDateTime;
@@ -66,29 +67,7 @@ public class FragmentVoucher extends Fragment {
         return view;
     }
 
-    public class AuthInterceptor implements ClientInterceptor {
-        private final String bearerToken;
 
-        public AuthInterceptor(String bearerToken) {
-            this.bearerToken = bearerToken;
-        }
-
-        @Override
-        public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(
-                MethodDescriptor<ReqT, RespT> method, CallOptions callOptions, Channel next) {
-
-            return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(
-                    next.newCall(method, callOptions)) {
-
-                @Override
-                public void start(Listener<RespT> responseListener, Metadata headers) {
-                    Metadata.Key<String> AUTHORIZATION_KEY = Metadata.Key.of("Authorization", Metadata.ASCII_STRING_MARSHALLER);
-                    headers.put(AUTHORIZATION_KEY, "Bearer " + bearerToken);
-                    super.start(responseListener, headers);
-                }
-            };
-        }
-    }
 
     private class GetMyVouchers extends AsyncTask<Void, Void, RpcGetMyVouchers.GetMyVouchersResponse> {
 
@@ -103,7 +82,7 @@ public class FragmentVoucher extends Fragment {
 
             ManagedChannel channel = null;
             try {
-                channel = ManagedChannelBuilder.forAddress(Config.ip,Config.event_port)
+                channel = ManagedChannelBuilder.forAddress(Config.ip,Config.port)
                         .usePlaintext()
                         .intercept(new AuthInterceptor(accessToken))
                         .build();

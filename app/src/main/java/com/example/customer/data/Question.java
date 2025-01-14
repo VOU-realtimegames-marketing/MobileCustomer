@@ -1,8 +1,8 @@
 package com.example.customer.data;
 
 public class Question {
-    private String event_id;
-    private String games_id;
+    private long event_id;
+    private long games_id;
     private int number;
     private int index;
     private String question;
@@ -11,7 +11,7 @@ public class Question {
     private String option3;
     private String option4;
 
-    public Question(String event_id, String games_id, int number, int index, String question, String option1, String option2, String option3, String option4) {
+    public Question(long event_id, long games_id, int number, int index, String question, String option1, String option2, String option3, String option4) {
         this.event_id = event_id;
         this.games_id = games_id;
         this.number = number;
@@ -23,11 +23,11 @@ public class Question {
         this.option4 = option4;
     }
 
-    public String getEvent_id() {
+    public long getEvent_id() {
         return event_id;
     }
 
-    public String getGames_id() {
+    public long getGames_id() {
         return games_id;
     }
 
