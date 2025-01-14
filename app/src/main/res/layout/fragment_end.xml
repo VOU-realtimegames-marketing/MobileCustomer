@@ -25,6 +25,5 @@
         android:textSize="18sp"
         android:fontFamily="@font/timesnewroman"
         android:background="@drawable/button_background">
-
     </Button>
 </LinearLayout>

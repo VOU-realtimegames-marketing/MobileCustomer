@@ -43,17 +43,17 @@ public class FragmentFriendDetail extends Fragment {
         Button btnGiveAwayPlayturn = view.findViewById(R.id.btn_give_away_playturn);
 
         if (friend != null) {
-            imageView.setImageResource(friend.getAvatar());
+            imageView.setImageResource(R.drawable.default_avatar);
             fullname.setText(friend.getFullName());
             name.setText("Name: " + friend.getName());
-            email.setText("Email: " + friend.getEmail());
-            phone.setText("Phone: " + friend.getPhone());
-            if (friend.getStatus().equals("ask_playturn")){
-                status.setText("Status: Asking for Playturn");
-            }
-            else{
-                status.setText("Status: " + friend.getStatus());
-            }
+//            email.setText("Email: " + friend.getEmail());
+//            phone.setText("Phone: " + friend.getPhone());
+//            if (friend.getStatus().equals("ask_playturn")){
+//                status.setText("Status: Asking for Playturn");
+//            }
+//            else{
+//                status.setText("Status: " + friend.getStatus());
+//            }
 
         }
 

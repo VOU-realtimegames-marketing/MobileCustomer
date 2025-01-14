@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package vou.proto;
+
+import "user/rpc_get_all_other_users.proto";
+
+option go_package = "VOU-Server/proto/gen";
+
+service UserService {
+  rpc GetAllOtherUsers(GetAllOtherUsersRequest) returns (GetAllOtherUsersResponse) {}
+}

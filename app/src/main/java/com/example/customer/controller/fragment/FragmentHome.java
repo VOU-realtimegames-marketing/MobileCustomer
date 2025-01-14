@@ -21,15 +21,23 @@ import androidx.fragment.app.Fragment;
 import com.example.customer.Config.Config;
 import com.example.customer.R;
 import com.example.customer.data.Event;
+import com.example.customer.utils.Utils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.grpc.CallOptions;
+import io.grpc.Channel;
+import io.grpc.ClientCall;
+import io.grpc.ClientInterceptor;
+import io.grpc.ForwardingClientCall;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import vou.proto.EventServiceGrpc;
+import io.grpc.Metadata;
+import io.grpc.MethodDescriptor;
+import vou.proto.GatewayGrpc;
 import vou.proto.RpcGetAllEvents;
 
 
@@ -49,7 +57,8 @@ public class FragmentHome extends Fragment {
             }
         }
 
-        GetAllEvents getAllEvents = new GetAllEvents();
+        String accessToken = Utils.getAccessToken(requireActivity());
+        GetAllEvents getAllEvents = new GetAllEvents(accessToken);
         getAllEvents.execute();
     }
 
@@ -114,32 +123,62 @@ public class FragmentHome extends Fragment {
         return view;
     }
 
+    public class AuthInterceptor implements ClientInterceptor {
+        private final String bearerToken;
+
+        public AuthInterceptor(String bearerToken) {
+            this.bearerToken = bearerToken;
+        }
+
+        @Override
+        public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(
+                MethodDescriptor<ReqT, RespT> method, CallOptions callOptions, Channel next) {
+
+            return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(
+                    next.newCall(method, callOptions)) {
+
+                @Override
+                public void start(Listener<RespT> responseListener, Metadata headers) {
+                    Metadata.Key<String> AUTHORIZATION_KEY = Metadata.Key.of("Authorization", Metadata.ASCII_STRING_MARSHALLER);
+                    headers.put(AUTHORIZATION_KEY, "Bearer " + bearerToken);
+                    super.start(responseListener, headers);
+                }
+            };
+        }
+    }
+
     private class GetAllEvents extends AsyncTask<Void, Void, RpcGetAllEvents.GetAllEventsResponse> {
+        private String accessToken;
+
+        public GetAllEvents(String accessToken) {
+            this.accessToken = accessToken;
+        }
+
         @Override
         protected RpcGetAllEvents.GetAllEventsResponse doInBackground(Void... voids) {
             ManagedChannel channel = null;
             try {
-                channel = ManagedChannelBuilder.forAddress(Config.ip,Config.event_port)
+                channel = ManagedChannelBuilder.forAddress(Config.ip, Config.port)
                         .usePlaintext()
+                        .intercept(new AuthInterceptor(accessToken))
                         .build();
 
-                EventServiceGrpc.EventServiceBlockingStub stub = EventServiceGrpc.newBlockingStub(channel);
+                GatewayGrpc.GatewayBlockingStub blockingStub = GatewayGrpc.newBlockingStub(channel);
                 RpcGetAllEvents.GetAllEventsRequest request = RpcGetAllEvents.GetAllEventsRequest.newBuilder()
                         .build();
-                RpcGetAllEvents.GetAllEventsResponse response = stub.getAllEvents(request);
+                RpcGetAllEvents.GetAllEventsResponse response = blockingStub.getAllEvents(request);
                 return response;
 
-            }
-            catch (Exception e){
-                Log.e("Error in Get All Event async task:",e.getMessage());
-            }
-            finally {
+            } catch (Exception e) {
+                Log.e("Error in GetAllEvents:", e.getMessage());
+            } finally {
                 if (channel != null) {
                     channel.shutdown();
                 }
             }
             return null;
         }
+
         @Override
         protected void onPostExecute(RpcGetAllEvents.GetAllEventsResponse response) {
             super.onPostExecute(response);
@@ -162,10 +201,8 @@ public class FragmentHome extends Fragment {
                     convertedEvents.add(event);
                 }
 
-
                 upcoming_events.clear();
                 upcoming_events.addAll(convertedEvents);
-
 
                 FragmentHome.this.getActivity().runOnUiThread(() -> {
                     Button btnUpcoming = getView().findViewById(R.id.btn_upcoming);
@@ -179,8 +216,6 @@ public class FragmentHome extends Fragment {
         private LocalDateTime convertToLocalDateTime(long seconds) {
             return LocalDateTime.ofEpochSecond(seconds, 0, ZoneOffset.UTC);
         }
-
-
     }
 }
 

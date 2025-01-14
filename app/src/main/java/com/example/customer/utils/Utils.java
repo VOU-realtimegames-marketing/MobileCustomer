@@ -153,5 +153,10 @@ public class Utils {
         SharedPreferences userInfo=activity.getSharedPreferences(Config.userInfo, Activity.MODE_PRIVATE);
         return userInfo.getString("role","");
     }
+
+    public static String getAccessToken(Activity activity){
+        SharedPreferences userInfo=activity.getSharedPreferences(Config.userInfo, Activity.MODE_PRIVATE);
+        return userInfo.getString("access_token","");
+    }
 }
 

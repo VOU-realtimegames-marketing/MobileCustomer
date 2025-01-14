@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package vou.proto;
+
+import "event-quiz/voucher.proto";
+
+option go_package = "VOU-Server/proto/gen";
+
+message WinVoucherRequest {
+  int64 event_id = 1;
+  string username = 2;
+}
+
+message WinVoucherResponse {
+  Voucher voucher = 1;
+}

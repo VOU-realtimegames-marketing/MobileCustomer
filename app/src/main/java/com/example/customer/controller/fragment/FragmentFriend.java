@@ -1,7 +1,9 @@
 package com.example.customer.controller.fragment;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,28 +16,38 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.customer.Config.Config;
 import com.example.customer.R;
 import com.example.customer.data.Friend;
+import com.example.customer.utils.Utils;
+
 
 import java.util.ArrayList;
 import java.util.List;
 
+import io.grpc.CallOptions;
+import io.grpc.Channel;
+import io.grpc.ClientCall;
+import io.grpc.ClientInterceptor;
+import io.grpc.ForwardingClientCall;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.Metadata;
+import io.grpc.MethodDescriptor;
+import vou.proto.GatewayGrpc;
+import vou.proto.RpcGetAllOtherUsers;
+
 public class FragmentFriend extends Fragment {
     List<Friend> friends = new ArrayList<>();
-
-    Friend friend1 = new Friend(1, "vuong", "Tran Vuong", "vuong@gmail.com", "0987654321", R.drawable.default_avatar, "user", "ask_playturn");
-    Friend friend2 = new Friend(2, "phong", "Cao Phong", "vuong@gmail.com", "0987654321", R.drawable.default_avatar, "user", "");
-    Friend friend3 = new Friend(3, "cuong", "Huynh Cuong", "vuong@gmail.com", "0987654321", R.drawable.default_avatar, "user", "");
-    Friend friend4 = new Friend(4, "hung", "Nguyen Hung", "vuong@gmail.com", "0987654321", R.drawable.default_avatar, "user", "ask_playturn");
-    Friend friend5 = new Friend(5, "lam", "Nguyen Lam", "vuong@gmail.com", "0987654321", R.drawable.default_avatar, "user", "");
-
-    Friend[] friendsArray = {friend1, friend2, friend3, friend4, friend5};
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        friends.addAll(List.of(friendsArray));
+
+        String accessToken = Utils.getAccessToken(requireActivity());
+        GetAllOtherUsers getAllOtherUsers = new GetAllOtherUsers(accessToken);
+        getAllOtherUsers.execute();
+
     }
 
     @Nullable
@@ -67,6 +79,94 @@ public class FragmentFriend extends Fragment {
 
         return view;
     }
+
+    public class AuthInterceptor implements ClientInterceptor {
+        private final String bearerToken;
+
+        public AuthInterceptor(String bearerToken) {
+            this.bearerToken = bearerToken;
+        }
+
+        @Override
+        public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(
+                MethodDescriptor<ReqT, RespT> method, CallOptions callOptions, Channel next) {
+
+            return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(
+                    next.newCall(method, callOptions)) {
+
+                @Override
+                public void start(Listener<RespT> responseListener, Metadata headers) {
+                    Metadata.Key<String> AUTHORIZATION_KEY = Metadata.Key.of("Authorization", Metadata.ASCII_STRING_MARSHALLER);
+                    headers.put(AUTHORIZATION_KEY, "Bearer " + bearerToken);
+                    super.start(responseListener, headers);
+                }
+            };
+        }
+    }
+
+    private class GetAllOtherUsers extends AsyncTask<Void, Void, RpcGetAllOtherUsers.GetAllOtherUsersResponse> {
+        private String accessToken;
+
+        public GetAllOtherUsers(String accessToken) {
+            this.accessToken = accessToken;
+        }
+
+        @Override
+        protected RpcGetAllOtherUsers.GetAllOtherUsersResponse doInBackground(Void... voids) {
+            ManagedChannel channel = null;
+            try {
+                channel = ManagedChannelBuilder.forAddress(Config.ip,Config.event_port)
+                        .usePlaintext()
+                        .intercept(new AuthInterceptor(accessToken))
+                        .build();
+
+                GatewayGrpc.GatewayBlockingStub blockingStub = GatewayGrpc.newBlockingStub(channel);
+                RpcGetAllOtherUsers.GetAllOtherUsersRequest request = RpcGetAllOtherUsers.GetAllOtherUsersRequest.newBuilder()
+                        .build();
+                RpcGetAllOtherUsers.GetAllOtherUsersResponse response = blockingStub.getAllOtherUsers(request);
+
+                return response;
+            }
+            catch (Exception e) {
+                Log.e("Error in GetAllOtherUsers", e.getMessage());
+            }
+            finally {
+                if (channel != null) {
+                    channel.shutdown();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(RpcGetAllOtherUsers.GetAllOtherUsersResponse response) {
+            super.onPostExecute(response);
+            if (response != null) {
+                List<Friend> convertedFriends = new ArrayList<>();
+                for (vou.proto.UserOuterClass.User grpcUser : response.getUsersList()) {
+                    Friend friend = new Friend(
+                            grpcUser.getUsername(),
+                            grpcUser.getFullName(),
+                            grpcUser.getRole()
+                    );
+                    convertedFriends.add(friend);
+                }
+                friends.clear();
+                friends.addAll(convertedFriends);
+
+                FragmentFriend.this.getActivity().runOnUiThread(() -> {
+                    ListView listView = getView().findViewById(R.id.list_friends);
+                    if (listView != null) {
+                        listView.invalidateViews();
+                    }
+                });
+
+            }
+        }
+
+    }
+
+
 }
 class FriendAdapter extends ArrayAdapter<Friend> {
     private Context context;
@@ -89,17 +189,13 @@ class FriendAdapter extends ArrayAdapter<Friend> {
 
         ImageView imageView = convertView.findViewById(R.id.friend_image);
         TextView name = convertView.findViewById(R.id.friend_name);
-        TextView status = convertView.findViewById(R.id.status);
+        TextView role = convertView.findViewById(R.id.status);
 
 
-        imageView.setImageResource(friend.getAvatar());
+        imageView.setImageResource(R.drawable.default_avatar);
         name.setText(friend.getFullName());
-        if (friend.getStatus().equals("ask_playturn")){
-            status.setText("Asking for Playturn");
-        }
-        else{
-            status.setText(friend.getStatus());
-        }
+        role.setText("Role: " + friend.getRole());
+
 
         return convertView;
     }

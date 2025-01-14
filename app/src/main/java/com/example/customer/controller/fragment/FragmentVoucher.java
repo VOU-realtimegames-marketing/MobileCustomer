@@ -1,7 +1,9 @@
 package com.example.customer.controller.fragment;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,30 +16,44 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.customer.Config.Config;
 import com.example.customer.R;
 import com.example.customer.data.Event;
 import com.example.customer.data.Game;
 import com.example.customer.data.Voucher;
+import com.example.customer.utils.Utils;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.grpc.CallOptions;
+import io.grpc.Channel;
+import io.grpc.ClientCall;
+import io.grpc.ClientInterceptor;
+import io.grpc.ForwardingClientCall;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.Metadata;
+import io.grpc.MethodDescriptor;
+import vou.proto.EventServiceGrpc;
+import vou.proto.GatewayGrpc;
+import vou.proto.RpcGetMyVouchers;
 
 public class FragmentVoucher extends Fragment {
 
     private List<Voucher> vouchers = new ArrayList<>();
-    Voucher voucher1 = new Voucher(1, 1, "Event 1", "", "", LocalDateTime.now(), 10);
-    Voucher voucher2 = new Voucher(2, 1, "Event 1", "", "", LocalDateTime.now(), 10);
-    Voucher voucher3 = new Voucher(3, 2, "Event 2", "", "", LocalDateTime.now(), 30);
-    Voucher voucher4 = new Voucher(4, 3, "Event 3", "", "", LocalDateTime.now(), 20);
-    Voucher voucher5 = new Voucher(5, 4, "Event 4", "", "", LocalDateTime.now(), 10);
 
-    Voucher[] list_vouchers = {voucher1, voucher2, voucher3, voucher4, voucher5};
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        vouchers.addAll(List.of(list_vouchers));
+
+        String accessToken = Utils.getAccessToken(requireActivity());
+        GetMyVouchers getMyVouchers = new GetMyVouchers(accessToken);
+        getMyVouchers.execute();
+
     }
 
     @Nullable
@@ -49,6 +65,104 @@ public class FragmentVoucher extends Fragment {
         listView.setAdapter(adapter);
         return view;
     }
+
+    public class AuthInterceptor implements ClientInterceptor {
+        private final String bearerToken;
+
+        public AuthInterceptor(String bearerToken) {
+            this.bearerToken = bearerToken;
+        }
+
+        @Override
+        public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(
+                MethodDescriptor<ReqT, RespT> method, CallOptions callOptions, Channel next) {
+
+            return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(
+                    next.newCall(method, callOptions)) {
+
+                @Override
+                public void start(Listener<RespT> responseListener, Metadata headers) {
+                    Metadata.Key<String> AUTHORIZATION_KEY = Metadata.Key.of("Authorization", Metadata.ASCII_STRING_MARSHALLER);
+                    headers.put(AUTHORIZATION_KEY, "Bearer " + bearerToken);
+                    super.start(responseListener, headers);
+                }
+            };
+        }
+    }
+
+    private class GetMyVouchers extends AsyncTask<Void, Void, RpcGetMyVouchers.GetMyVouchersResponse> {
+
+        private String accessToken;
+
+        public GetMyVouchers(String accessToken) {
+            this.accessToken = accessToken;
+        }
+
+        @Override
+        protected RpcGetMyVouchers.GetMyVouchersResponse doInBackground(Void... voids) {
+
+            ManagedChannel channel = null;
+            try {
+                channel = ManagedChannelBuilder.forAddress(Config.ip,Config.event_port)
+                        .usePlaintext()
+                        .intercept(new AuthInterceptor(accessToken))
+                        .build();
+
+                GatewayGrpc.GatewayBlockingStub blockingStub = GatewayGrpc.newBlockingStub(channel);
+                RpcGetMyVouchers.GetMyVouchersRequest request = RpcGetMyVouchers.GetMyVouchersRequest.newBuilder()
+                        .build();
+
+                RpcGetMyVouchers.GetMyVouchersResponse response = blockingStub.getMyVouchers(request);
+                return response;
+            }
+            catch (Exception e) {
+                Log.e("Error in Get My Vouchers async task:", e.getMessage());
+            }
+            finally {
+                if (channel != null) {
+                    channel.shutdown();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(RpcGetMyVouchers.GetMyVouchersResponse response) {
+            super.onPostExecute(response);
+            if (response != null) {
+                List<Voucher> convertedVouchers = new ArrayList<>();
+                for (vou.proto.VoucherOuterClass.Voucher grpcVoucher : response.getVouchersList()) {
+                    Voucher voucher = new Voucher(
+                            grpcVoucher.getId(),
+                            grpcVoucher.getEventId(),
+                            grpcVoucher.getQrCode(),
+                            grpcVoucher.getType(),
+                            grpcVoucher.getStatus(),
+                            grpcVoucher.getDiscount(),
+                            convertToLocalDateTime(grpcVoucher.getExpiresAt().getSeconds())
+                    );
+                    convertedVouchers.add(voucher);
+                }
+                vouchers.clear();
+                vouchers.addAll(convertedVouchers);
+
+                FragmentVoucher.this.getActivity().runOnUiThread(() -> {
+                    ListView listView = getView().findViewById(R.id.list_vouchers);
+                    if (listView != null) {
+                        listView.invalidateViews();
+                    }
+                });
+
+            }
+        }
+
+        private LocalDateTime convertToLocalDateTime(long seconds) {
+            return LocalDateTime.ofEpochSecond(seconds, 0, ZoneOffset.UTC);
+        }
+
+
+    }
+
 }
 class VoucherAdapter extends ArrayAdapter<Voucher> {
     private Context context;
@@ -74,9 +188,9 @@ class VoucherAdapter extends ArrayAdapter<Voucher> {
         TextView voucherQuantity = convertView.findViewById(R.id.voucher_quantity);
 
 
-        name.setText(voucher.getEventName());
+
         expiresAt.setText("Expires at: " + voucher.getExpiresAt());
-        voucherQuantity.setText(" - " + String.valueOf(voucher.getVoucherQuantity()) + " %");
+        voucherQuantity.setText(" - " + String.valueOf(voucher.getDiscount()) + " %");
 
         return convertView;
     }

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package vou.proto;
+
+import "event-quiz/voucher.proto";
+
+option go_package = "VOU-Server/proto/gen";
+
+message GetMyVouchersRequest {
+  string username = 1;
+}
+
+message GetMyVouchersResponse {
+  repeated Voucher vouchers = 1;
+}

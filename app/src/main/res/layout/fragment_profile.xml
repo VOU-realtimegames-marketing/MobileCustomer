@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:padding="16dp"
     android:gravity="center"
-    >
+    android:background="@drawable/background">
 
     <!-- Avatar ImageView -->
     <ImageView
