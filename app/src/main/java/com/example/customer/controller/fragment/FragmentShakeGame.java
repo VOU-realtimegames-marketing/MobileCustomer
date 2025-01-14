@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -19,8 +20,14 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.example.customer.Config.Config;
 import com.example.customer.R;
 import com.example.customer.sensors.ShakeDetector;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import vou.proto.GatewayGrpc;
+import vou.proto.RpcWinVoucher;
 
 
 public class FragmentShakeGame extends Fragment {
@@ -112,6 +119,8 @@ public class FragmentShakeGame extends Fragment {
             tvMsg.setText("Chúc mừng bạn đã trúng thưởng");
             tvVoucher.setText("Voucher 100.000đ");
             btnReceive.setText("Nhận");
+            new WinVoucherTask(tvVoucher).execute();
+
         }
         else{
             tvMsg.setText("Rất tiếc, bạn chưa trúng thưởng");
@@ -172,5 +181,43 @@ public class FragmentShakeGame extends Fragment {
         super.onPause();
     }
 
+    private class WinVoucherTask extends AsyncTask<Void, Void, RpcWinVoucher.WinVoucherResponse> {
+        private TextView tvVoucher;
+
+        public WinVoucherTask(TextView tvVoucher) {
+            this.tvVoucher = tvVoucher;
+        }
+
+        @Override
+        protected RpcWinVoucher.WinVoucherResponse doInBackground(Void... voids) {
+            ManagedChannel channel = null;
+            try {
+                channel = ManagedChannelBuilder.forAddress(Config.ip, Config.port)
+                        .usePlaintext()
+                        .build();
+
+                GatewayGrpc.GatewayBlockingStub blockingStub = GatewayGrpc.newBlockingStub(channel);
+                RpcWinVoucher.WinVoucherRequest request = RpcWinVoucher.WinVoucherRequest.newBuilder()
+                        .build();
+
+                return blockingStub.winVoucher(request);
+            } catch (Exception e) {
+                Log.e("WinVoucherTask", "Error: " + e.getMessage());
+            } finally {
+                if (channel != null) {
+                    channel.shutdown();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(RpcWinVoucher.WinVoucherResponse response) {
+            if (response != null) {
+                vou.proto.VoucherOuterClass.Voucher voucher = response.getVoucher();
+                tvVoucher.setText("Voucher " + voucher.getDiscount() + "đ");
+            }
+        }
+    }
 
 }
