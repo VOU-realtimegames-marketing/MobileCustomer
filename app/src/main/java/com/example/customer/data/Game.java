@@ -1,5 +1,7 @@
 package com.example.customer.data;
 
+import com.example.customer.R;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -18,6 +20,12 @@ public class Game implements Serializable {
         this.game_id = game_id;
         this.game_name = game_name;
         this.game_image = game_image;
+        if(game_id == 1) {
+            this.game_image = R.drawable.quiz;
+        }
+        else {
+            this.game_image = R.drawable.shake;
+        }
         this.start_time = start_time;
         this.end_time = end_time;
         this.quiz_num = quiz_num;

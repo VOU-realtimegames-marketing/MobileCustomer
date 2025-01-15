@@ -211,7 +211,7 @@ class GameAdapter extends ArrayAdapter<Game> {
 
         imageView.setImageResource(game.getGameImage());
         name.setText(game.getGameName());
-        startTime.setText("");
+        startTime.setText(game.getStartTime().toString());
 
         return convertView;
     }

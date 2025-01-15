@@ -172,7 +172,7 @@ public class FragmentHome extends Fragment {
                             grpcEvent.getGameId(),
                             grpcEvent.getStoreId(),
                             grpcEvent.getName(),
-                            R.drawable.ic_launcher_foreground,
+                            R.drawable.event4,
                             grpcEvent.getVoucherQuantity(),
                             convertToLocalDateTime(grpcEvent.getStartTime().getSeconds()),
                             convertToLocalDateTime(grpcEvent.getEndTime().getSeconds()),
