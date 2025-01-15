@@ -22,7 +22,16 @@ import android.widget.TextView;
 
 import com.example.customer.Config.Config;
 import com.example.customer.R;
+import com.example.customer.data.Game;
+import com.example.customer.data.Voucher;
 import com.example.customer.sensors.ShakeDetector;
+import com.example.customer.utils.AuthInterceptor;
+import com.example.customer.utils.Utils;
+import com.google.protobuf.Timestamp;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -44,6 +53,7 @@ public class FragmentShakeGame extends Fragment {
     private TextView tvPlayTurns;
     private Button btnShare;
     private Button btnAskFriends;
+    private Game game;
 
 
 
@@ -55,6 +65,10 @@ public class FragmentShakeGame extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(getArguments() != null){
+            game = (Game) getArguments().getSerializable("game");
+        }
+
         // ShakeDetector initialization
         mSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -117,9 +131,22 @@ public class FragmentShakeGame extends Fragment {
 
         if(isWin){
             tvMsg.setText("Chúc mừng bạn đã trúng thưởng");
-            tvVoucher.setText("Voucher 100.000đ");
+            tvVoucher.setText("Xử lý...");
             btnReceive.setText("Nhận");
-            new WinVoucherTask(tvVoucher).execute();
+
+            String accessToken = Utils.getAccessToken(requireActivity());
+            String event_id_string = String.valueOf(game.getEventId());
+
+            // Gọi WinVoucher với callback
+            WinVoucher winVoucher = new WinVoucher(accessToken, voucher -> {
+                if (voucher != null) {
+                    tvVoucher.setText("Voucher " + voucher.getDiscount() + "đ");
+                } else {
+                    tvVoucher.setText("Voucher lỗi.");
+                }
+            });
+
+            winVoucher.execute(event_id_string);
 
         }
         else{
@@ -181,28 +208,35 @@ public class FragmentShakeGame extends Fragment {
         super.onPause();
     }
 
-    private class WinVoucherTask extends AsyncTask<Void, Void, RpcWinVoucher.WinVoucherResponse> {
-        private TextView tvVoucher;
+    private class WinVoucher extends AsyncTask<String, Void, RpcWinVoucher.WinVoucherResponse> {
+        private String accessToken;
+        private WinVoucherCallback callback;
 
-        public WinVoucherTask(TextView tvVoucher) {
-            this.tvVoucher = tvVoucher;
+        public WinVoucher(String accessToken, WinVoucherCallback callback) {
+            this.accessToken = accessToken;
+            this.callback = callback;
         }
 
         @Override
-        protected RpcWinVoucher.WinVoucherResponse doInBackground(Void... voids) {
+        protected RpcWinVoucher.WinVoucherResponse doInBackground(String... params) {
+            String event_id_string = params[0];
+            long event_id = Long.parseLong(event_id_string);
+
             ManagedChannel channel = null;
             try {
                 channel = ManagedChannelBuilder.forAddress(Config.ip, Config.port)
                         .usePlaintext()
+                        .intercept(new AuthInterceptor(accessToken))
                         .build();
 
                 GatewayGrpc.GatewayBlockingStub blockingStub = GatewayGrpc.newBlockingStub(channel);
                 RpcWinVoucher.WinVoucherRequest request = RpcWinVoucher.WinVoucherRequest.newBuilder()
+                        .setEventId(event_id)
                         .build();
 
                 return blockingStub.winVoucher(request);
             } catch (Exception e) {
-                Log.e("WinVoucherTask", "Error: " + e.getMessage());
+                Log.e("Error in WinVoucher", e.getMessage());
             } finally {
                 if (channel != null) {
                     channel.shutdown();
@@ -213,11 +247,34 @@ public class FragmentShakeGame extends Fragment {
 
         @Override
         protected void onPostExecute(RpcWinVoucher.WinVoucherResponse response) {
-            if (response != null) {
-                vou.proto.VoucherOuterClass.Voucher voucher = response.getVoucher();
-                tvVoucher.setText("Voucher " + voucher.getDiscount() + "đ");
+            super.onPostExecute(response);
+
+            Voucher resultVoucher = null;
+            if (response != null && response.hasVoucher()) {
+                resultVoucher = new Voucher(
+                        response.getVoucher().getId(),
+                        response.getVoucher().getEventId(),
+                        response.getVoucher().getQrCode(),
+                        response.getVoucher().getType(),
+                        response.getVoucher().getStatus(),
+                        response.getVoucher().getDiscount(),
+                        convertTimestampToLocalDateTime(response.getVoucher().getExpiresAt())
+                );
+            }
+
+            if (callback != null) {
+                callback.onWinVoucherCompleted(resultVoucher);
             }
         }
+    }
+
+    public interface WinVoucherCallback {
+        void onWinVoucherCompleted(Voucher voucher);
+    }
+
+    public LocalDateTime convertTimestampToLocalDateTime(Timestamp timestamp) {
+        Instant instant = Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos());
+        return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
     }
 
 }

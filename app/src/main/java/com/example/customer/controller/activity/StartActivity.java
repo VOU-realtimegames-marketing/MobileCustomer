@@ -33,6 +33,7 @@ public class StartActivity extends Activity {
         } else {
             intent = new Intent(this, LogInActivity.class);
         }
+//        intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
     }

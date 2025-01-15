@@ -89,6 +89,7 @@ public class FragmentGameDetail extends Fragment {
     private void joinGame(Game game) {
         if (game.getGameId() == 1) {
             FragmentWaiting waitingFragment = new FragmentWaiting();
+
             Bundle args = new Bundle();
             args.putSerializable("game", game);
             args.putLong("start_time", startTimeMillis); // Gửi start time dưới dạng long
@@ -101,6 +102,10 @@ public class FragmentGameDetail extends Fragment {
                     .commit();
         } else if (game.getGameId() == 2) {
             FragmentShakeGame shakeGameFragment = new FragmentShakeGame();
+            Bundle args = new Bundle();
+            args.putSerializable("game", game);
+
+            shakeGameFragment.setArguments(args);
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.fragment_container, shakeGameFragment)

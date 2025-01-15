@@ -49,6 +49,4 @@ public class Game implements Serializable {
         return quiz_num;
     }
 
-
-
 }
