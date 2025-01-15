@@ -109,6 +109,7 @@ public class FragmentGameDetail extends Fragment {
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.fragment_container, shakeGameFragment)
+                    .addToBackStack("FragmentShakeGame")
                     .commit();
         }
     }

@@ -140,7 +140,7 @@ public class FragmentShakeGame extends Fragment {
             // Gọi WinVoucher với callback
             WinVoucher winVoucher = new WinVoucher(accessToken, voucher -> {
                 if (voucher != null) {
-                    tvVoucher.setText("Voucher " + voucher.getDiscount() + "đ");
+                    tvVoucher.setText("Voucher " + voucher.getDiscount() + "%");
                 } else {
                     tvVoucher.setText("Voucher lỗi.");
                 }

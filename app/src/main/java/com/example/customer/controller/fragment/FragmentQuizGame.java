@@ -185,8 +185,7 @@ public class FragmentQuizGame extends Fragment {
             return;
         }
 
-        isWin = answer.getIsWin();
-        isCorrect = answer.getIsCorrect();
+
         selectedOption = selectedButton;
 
 
@@ -384,6 +383,7 @@ public class FragmentQuizGame extends Fragment {
             } catch (Exception e) {
                 Log.e("AnswerQuestion", "Error: " + e.getMessage());
             } finally {
+
                 if (channel != null) {
                     channel.shutdown();
                 }
@@ -398,6 +398,8 @@ public class FragmentQuizGame extends Fragment {
 
             if (answerResponse != null) {
                 answer = answerResponse;
+                isWin = answer.getIsWin();
+                isCorrect = answer.getIsCorrect();
             } else {
                 Log.e("AnswerQuestion", "No answer received");
             }
